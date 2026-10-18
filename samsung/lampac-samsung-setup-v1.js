@@ -34,7 +34,39 @@
         }
         if (window[guard]) return;
         window[guard] = true;
+        ensureNativePluginRegistered();
         initialize();
+    }
+
+    // on.js loads plugins asynchronously, sometimes after the settings menu was built.
+    // Register this exact HTTPS URL in native Lampa's own plugin registry so that
+    // on the NEXT launch it loads before Settings.init(), just like manually added etor.
+    // Never re-enable an existing disabled entry or touch other client installations.
+    function ensureNativePluginRegistered() {
+        if (!Lampa.Plugins ||
+            typeof Lampa.Plugins.get !== 'function' ||
+            typeof Lampa.Plugins.add !== 'function') return;
+
+        var url = 'https://ipvideocom-star.github.io/lampa-plugins/samsung/lampac-samsung-setup-v1.js';
+        var existing = Lampa.Plugins.get();
+        if (!Array.isArray(existing)) return;
+
+        var found = existing.some(function (plugin) {
+            var storedUrl = typeof plugin === 'string' ? plugin : plugin && plugin.url;
+            return typeof storedUrl === 'string' &&
+                   storedUrl.split('?')[0] === url;
+        });
+        if (found) return;
+
+        try {
+            Lampa.Plugins.add({
+                url: url,
+                status: 1,
+                name: 'Lampac Samsung setup'
+            });
+        } catch (e) {
+            if (window.console && console.warn) console.warn('[Lampac Samsung] native plugin registration failed', e);
+        }
     }
 
     function initialize() {
