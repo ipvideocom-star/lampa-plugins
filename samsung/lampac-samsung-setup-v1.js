@@ -36,6 +36,7 @@
         window[guard] = true;
         ensureNativePluginRegistered();
         initialize();
+        restoreNativeSettingsFolders();
     }
 
     // on.js loads plugins asynchronously, sometimes after the settings menu was built.
@@ -67,6 +68,45 @@
         } catch (e) {
             if (window.console && console.warn) console.warn('[Lampac Samsung] native plugin registration failed', e);
         }
+    }
+
+    // Restore built-in settings folders removed before late-loaded on.js plugins.
+    function restoreNativeSettingsFolders() {
+        var tries = 0;
+        function run() {
+            tries++;
+            try {
+                if (window.Lampa && Lampa.Settings && Lampa.Template &&
+                    typeof Lampa.Settings.main === 'function' &&
+                    typeof Lampa.Template.get === 'function') {
+                    var main = Lampa.Settings.main();
+                    if (main && typeof main.render === 'function' && typeof main.update === 'function') {
+                        var view = main.render();
+                        if (view && typeof view.find === 'function') {
+                            if (view.find('[data-component="parser"]').length &&
+                                view.find('[data-component="server"]').length) return;
+                            var template = Lampa.Template.get('settings_main');
+                            if (template && typeof template.find === 'function') {
+                                var changed = false;
+                                ['parser','server'].forEach(function (key) {
+                                    if (view.find('[data-component="' + key + '"]').length) return;
+                                    var item = template.find('[data-component="' + key + '"]').first();
+                                    var anchor = view.find('[data-component="tmdb"]').first();
+                                    if (!item.length || !anchor.length) return;
+                                    item.clone().insertBefore(anchor);
+                                    changed = true;
+                                });
+                                if (changed) main.update();
+                                if (view.find('[data-component="parser"]').length &&
+                                    view.find('[data-component="server"]').length) return;
+                            }
+                        }
+                    }
+                }
+            } catch (e) { /* incompatible client; do not alter anything else */ }
+            if (tries < 40) window.setTimeout(run, 250);
+        }
+        run();
     }
 
     function initialize() {
