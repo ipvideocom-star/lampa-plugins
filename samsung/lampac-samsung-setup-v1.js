@@ -40,7 +40,7 @@
     function initialize() {
     var storage = Lampa.Storage;
     var torrserverUrl = 'https://lampa.v6.army/ts';
-    var parserHost = 'lampa.v6.army'; // proven Lampac web-client parser address
+    var parserHost = 'https://lampa.v6.army'; // required by Samsung Apps Lampa
 
     function read(key) {
         var value = storage.get(key, '');
@@ -54,8 +54,12 @@
 
     // Parser compatibility mode; Lampac JacRed proxies its configured webapi.
     // This is not a request to install or start Jackett/JacRed indexing locally.
-    var parserWasEmpty = !read('jackett_url');
-    setIfMissing('jackett_url', parserHost);
+    var currentParserHost = read('jackett_url');
+    var parserWasEmpty = !currentParserHost;
+    // Upgrade only our old bare/HTTP endpoint; leave custom parser addresses alone.
+    if (parserWasEmpty || /^(?:http:\/\/)?lampa\.v6\.army\/?$/i.test(currentParserHost)) {
+        storage.set('jackett_url', parserHost);
+    }
     if (parserWasEmpty) {
         // A fresh Samsung installation often has parser_use='false' by default.
         storage.set('parser_use', 'true');
