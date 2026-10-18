@@ -16,6 +16,13 @@
     var host = String((window.location && window.location.hostname) || '').toLowerCase();
     if (!isTizen || host === 'lampa.v6.army' || /\.lampa\.v6\.army$/.test(host)) return;
 
+    // As in etor, set UI feature flags immediately, BEFORE waiting for Storage.
+    // Lampa creates the Parser/TorrServer settings folders during startup.
+    window.lampa_settings = window.lampa_settings || {};
+    window.lampa_settings.torrents_use = true;
+    window.lampa_settings.demo = false;
+    window.lampa_settings.read_only = false;
+
     var readyAttempts = 0;
     function whenLampaReady() {
         if (!window.Lampa || !Lampa.Storage ||
@@ -44,12 +51,6 @@
         // Never overwrite deliberately selected settings (including 'false').
         if (!read(key)) storage.set(key, value);
     }
-
-    // Show the sections hidden in some Samsung App Store builds.
-    window.lampa_settings = window.lampa_settings || {};
-    window.lampa_settings.torrents_use = true;
-    window.lampa_settings.demo = false;
-    window.lampa_settings.read_only = false;
 
     // Parser compatibility mode; Lampac JacRed proxies its configured webapi.
     // This is not a request to install or start Jackett/JacRed indexing locally.
