@@ -1,5 +1,15 @@
 # Lampac Source Grid v0.1 — тестовый клиентский плагин Lampa
 
+## Адрес для тестового подключения (GitHub Pages)
+
+`https://ipvideocom-star.github.io/lampa-plugins/source-grid/lampac-source-grid-v0.1.js`
+
+Адрес сконструирован для обычного GitHub Pages, обслуживающего ветку main и корень репозитория. GitHub-файл опубликован, но доступность Pages снаружи из этой среды не подтверждена.
+
+Резервная ссылка на исходник: https://github.com/ipvideocom-star/lampa-plugins/blob/main/source-grid/lampac-source-grid-v0.1.js
+
+Проверка: откройте адрес в обычном Chrome. Если вместо текста JavaScript получаете 404, проверьте страницу [Settings → Pages](https://github.com/ipvideocom-star/lampa-plugins/settings/pages) для репозитория и только после исправления добавляйте URL в расширения Lampa.
+
 ## Назначение
 
 Заменяет визуальное оформление штатного окна **выбора источников Lampac NG** плитками в три колонки (2 на узких экранах, 1 на мобильных). Использует штатные элементы Lampa и переданные Lampac объекты (`title`, `source`, `ghost`, `selected`), поэтому выбор источника сохраняет штатный обработчик.
