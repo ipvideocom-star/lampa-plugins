@@ -1,5 +1,25 @@
 # Lampac Source Grid v0.1 — тестовый клиентский плагин Lampa
 
+## Обновление: Source Grid v0.2 (27.10.2026)
+
+После сообщения, что v0.1 открывает обычное правое меню, исправлена логика обнаружения окна:
+v0.2 слушает штатное событие Lampa `Select.listener → fullshow` и определяет список Lampac
+по `source` / `ghost`, не привязываясь жёстко к названию текущего компонента.
+
+**Новый URL (GitHub Pages, доступность проверяется пользователем):**
+`https://ipvideocom-star.github.io/lampa-plugins/source-grid/lampac-source-grid-v0.2.js`
+
+При замене удалить **v0.1** из списка расширений конкретной Lampa, добавить **v0.2** и перезапустить клиент. Не устанавливать оба одновременно.
+При успешной загрузке должно появиться уведомление `Source Grid v0.2 загружен` (если доступны уведомления).
+Для диагностики в Chrome: `window.LampacSourceGridDiagnostics` — поля `version`, `hook`, `activations`.
+При открытии списка источников `activations` должно увеличиваться.
+
+Пока проверено в локальном имитаторе DOM и статической проверкой Node.js.
+Samsung Tizen и Android TV всё ещё требуют проверки на реальном устройстве.
+Рабочий Lampac NG / Samsung setup plugin / auth / источники не изменялись.
+
+---
+
 ## Адрес для тестового подключения (GitHub Pages)
 
 `https://ipvideocom-star.github.io/lampa-plugins/source-grid/lampac-source-grid-v0.1.js`
