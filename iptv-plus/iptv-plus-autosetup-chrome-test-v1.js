@@ -39,11 +39,11 @@
         }
     }
 
-    setup();
-    if (!initialized && window.Lampa && Lampa.Listener &&
-        typeof Lampa.Listener.follow === 'function') {
-        Lampa.Listener.follow('app', function (event) {
-            if (event && event.type === 'ready') setup();
-        });
+    // Lampa may still be starting when Plugin Manager loads this script.
+    var attempts = 0;
+    function startWhenReady() {
+        setup();
+        if (!initialized && attempts++ < 40) setTimeout(startWhenReady, 500);
     }
+    startWhenReady();
 })();
