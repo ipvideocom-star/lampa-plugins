@@ -1999,6 +1999,9 @@
     // Server-managed first-run defaults. Never replace a user's valid M3U or EPG URL.
     function initializeManagedDefaults() {
         try {
+            // Test only in desktop Chrome; do not provision Samsung/Android yet.
+            var ua = (window.navigator && window.navigator.userAgent) || '';
+            if (!/Chrome\/[0-9]+/i.test(ua) || /Tizen|Android|SmartTV|SMART-TV|WebOS|Mobile|CrKey/i.test(ua)) return;
             var playlistKey = PLUGIN + '_playlist';
             var current = Lampa.Storage.get(playlistKey, '');
             var value = typeof current === 'string' ? current.trim() : '';
