@@ -80,11 +80,15 @@ foreach($source in $sourceUrls.GetEnumerator()) {
     Write-Host "$($source.Key): parsed"
 }
 $seenUrls=[Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
-$pool=@(
-    foreach($item in ($candidates | Sort-Object Priority -Descending)) {
-        if ($seenUrls.Add($item.Url)) { $item }
-    }
-)
+$seenPrimaryIds=[Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+$primary=[Collections.Generic.List[object]]::new()
+$alternatives=[Collections.Generic.List[object]]::new()
+foreach($item in ($candidates | Sort-Object Priority -Descending)) {
+    if (-not $seenUrls.Add($item.Url)) { continue }
+    if ($seenPrimaryIds.Add($item.Id)) { $primary.Add($item) }
+    else { $alternatives.Add($item) }
+}
+$pool=@($primary.ToArray())+@($alternatives.ToArray())
 $checks=@($pool | Select-Object -First $maxChecks)
 Write-Host "HLS candidates selected for checking: $($checks.Count)"
 if (-not $checks) { throw 'No public HLS candidates' }
@@ -177,7 +181,11 @@ try {
         $target=Join-Path $root $entry.Key
         if (Test-Path $target) { throw "Target exists: $target" }
         $tmp=Join-Path $root ('.'+$entry.Key+'.'+$runId+'.tmp')
-        Copy-Item (Join-Path $stage $entry.Key) $tmp
+        Copy-Item (Join-Path $stage $entry.Key) $tmp -ErrorAction Stop
+        if ((Get-FileHash (Join-Path $stage $entry.Key) -Algorithm SHA256).Hash -ne
+            (Get-FileHash $tmp -Algorithm SHA256).Hash) {
+            throw "Staged copy checksum mismatch: $($entry.Key)"
+        }
         Move-Item $tmp $target -ErrorAction Stop
         $created.Add($target)
     }
