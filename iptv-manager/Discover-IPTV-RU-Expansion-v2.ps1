@@ -54,6 +54,26 @@ function Test-PublicUri([string]$value) {
             return $false
         }
     }
+    # Exclude domains resolving to private/LAN addresses.
+    try {
+        $addresses=[Net.Dns]::GetHostAddresses($uri.DnsSafeHost)
+        if($addresses.Count -eq 0){return $false}
+        foreach($address in $addresses){
+            if($address.AddressFamily -eq [Net.Sockets.AddressFamily]::InterNetwork){
+                $v=$address.GetAddressBytes()
+                if($v[0] -in @(0,10,127) -or $v[0] -ge 224 -or
+                    ($v[0] -eq 172 -and $v[1] -ge 16 -and $v[1] -le 31) -or
+                    ($v[0] -eq 192 -and $v[1] -eq 168) -or
+                    ($v[0] -eq 169 -and $v[1] -eq 254) -or
+                    ($v[0] -eq 100 -and $v[1] -ge 64 -and $v[1] -le 127)){return $false}
+            } elseif($address.AddressFamily -eq [Net.Sockets.AddressFamily]::InterNetworkV6){
+                $v=$address.GetAddressBytes()
+                if([Net.IPAddress]::IsLoopback($address) -or
+                    $address.IsIPv6LinkLocal -or $address.IsIPv6SiteLocal -or
+                    $address.IsIPv6Multicast -or ($v[0] -band 254) -eq 252){return $false}
+            }else{return $false}
+        }
+    }catch{return $false}
     return $true
 }
 foreach($file in @($uaFile,$ruFile,$combinedFile)){
@@ -153,6 +173,25 @@ $results=@(
                    ($b[0] -eq 169 -and $b[1] -eq 254) -or
                    ($b[0] -eq 100 -and $b[1] -ge 64 -and $b[1] -le 127)){return $false}
             }
+            try{
+                $addresses=[Net.Dns]::GetHostAddresses($hostName)
+                if($addresses.Count -eq 0){return $false}
+                foreach($address in $addresses){
+                    if($address.AddressFamily -eq [Net.Sockets.AddressFamily]::InterNetwork){
+                        $b=$address.GetAddressBytes()
+                        if($b[0] -in @(0,10,127) -or $b[0] -ge 224 -or
+                            ($b[0] -eq 172 -and $b[1] -ge 16 -and $b[1] -le 31) -or
+                            ($b[0] -eq 192 -and $b[1] -eq 168) -or
+                            ($b[0] -eq 169 -and $b[1] -eq 254) -or
+                            ($b[0] -eq 100 -and $b[1] -ge 64 -and $b[1] -le 127)){return $false}
+                    } elseif($address.AddressFamily -eq [Net.Sockets.AddressFamily]::InterNetworkV6){
+                        $b=$address.GetAddressBytes()
+                        if([Net.IPAddress]::IsLoopback($address) -or
+                            $address.IsIPv6LinkLocal -or $address.IsIPv6SiteLocal -or
+                            $address.IsIPv6Multicast -or ($b[0] -band 254) -eq 252){return $false}
+                    }else{return $false}
+                }
+            }catch{return $false}
             return $true
         }
         $fetch={
@@ -227,7 +266,8 @@ $results=@(
             $segmentUrl=([Uri]::new([Uri]$manifestUrl,$segment)).AbsoluteUri
             $segmentBytes=& $fetch $segmentUrl 4096
             $head=[Text.Encoding]::ASCII.GetString($segmentBytes,0,[Math]::Min(64,$segmentBytes.Length))
-            if($head -match '(?i)^\s*<(html|!doctype|xml)' -or $head -match '^#EXTM3U'){
+            if($head -match '(?i)^\s*<(html|!doctype|xml)' -or
+               $head -match '^\s*\{' -or $head -match '^#EXTM3U'){
                 throw 'Media segment returned HTML or M3U'
             }
             [pscustomobject]@{
@@ -285,6 +325,10 @@ $reportFile=Join-Path $stage 'report.json'
 [IO.File]::WriteAllText($reportFile,($report|ConvertTo-Json -Depth 8),[Text.UTF8Encoding]::new($false))
 Write-Host '=== NEW VERIFIED RU/RUS CHANNELS ==='
 $selected | Select-Object Name,Id,Source | Format-Table -AutoSize
+Write-Host '=== TOP FAILED CHECK REASONS ==='
+$results | Where-Object {-not $_.Verified} | Group-Object Error |
+    Sort-Object Count -Descending | Select-Object -First 8 Count,Name |
+    Format-Table -AutoSize -Wrap
 Write-Host '=== RESULT ==='
 [pscustomobject]@{
     ExistingChannels=98
