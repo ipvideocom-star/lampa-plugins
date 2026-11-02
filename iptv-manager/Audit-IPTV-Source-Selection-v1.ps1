@@ -104,6 +104,7 @@ if($candidates.Count -lt 1 -or $candidates.Count -gt 250){
 }
 $stamp=(Get-Date -Format 'yyyyMMdd-HHmmss')+'-'+[guid]::NewGuid().ToString('N').Substring(0,8)
 $dir=Join-Path $root ('source-audit-'+$Region.ToLowerInvariant()+'-'+$stamp)
+New-Item -ItemType Directory -Path $dir -Force | Out-Null
 $oldCount=$candidates.Count
 Write-Host '=== IPTV INDEPENDENT SOURCE HLS AUDIT ==='
 Write-Host "$Region review candidates: $oldCount"
