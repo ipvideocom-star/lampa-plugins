@@ -13,7 +13,7 @@ $dir=Join-Path $root ('catalog-'+$stamp)
 $urls=@(
     [pscustomobject]@{Name='channels';URL='https://iptv-org.github.io/api/channels.json';File='channels.json';Required=$true}
     [pscustomobject]@{Name='streams';URL='https://iptv-org.github.io/api/streams.json';File='streams.json';Required=$true}
-    [pscustomobject]@{Name='raw-ru';URL='https://iptv-org.github.io/iptv/raw/ru.m3u';File='raw-ru.m3u';Required=$false}
+    [pscustomobject]@{Name='raw-ru';URL='https://raw.githubusercontent.com/iptv-org/iptv/master/streams/ru.m3u';File='raw-ru.m3u';Required=$false}
     [pscustomobject]@{Name='freetv';URL='https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8';File='freetv.m3u8';Required=$false}
 )
 function CanonicalId([string]$id) {
