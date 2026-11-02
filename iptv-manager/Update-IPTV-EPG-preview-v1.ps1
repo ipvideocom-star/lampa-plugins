@@ -124,14 +124,16 @@ function Get-ProgrammeIndex([Xml.XmlDocument]$doc, $allowed, [DateTime]$minUtc, 
 function Get-CoverageMinutes($items, [DateTime]$from, [DateTime]$until) {
     if ($null -eq $items) { return 0 }
     $ranges = @(
-        foreach ($item in $items) {
-            if ($item.Stop -le $from -or $item.Start -ge $until) { continue }
-            [pscustomobject]@{
-                Start = if ($item.Start -lt $from) { $from } else { $item.Start }
-                Stop  = if ($item.Stop -gt $until) { $until } else { $item.Stop }
+        @(
+            foreach ($item in $items) {
+                if ($item.Stop -le $from -or $item.Start -ge $until) { continue }
+                [pscustomobject]@{
+                    Start = if ($item.Start -lt $from) { $from } else { $item.Start }
+                    Stop  = if ($item.Stop -gt $until) { $until } else { $item.Stop }
+                }
             }
-        }
-    ) | Sort-Object Start
+        ) | Sort-Object Start
+    )
     if (-not $ranges) { return 0 }
     $left = $ranges[0].Start
     $right = $ranges[0].Stop
@@ -312,11 +314,35 @@ foreach ($node in $xmlProgrammes) {
     }
 }
 
+# Baseline comparison uses the published v5 XMLTV, still read-only.
+$baselinePath = 'C:\IPTV-Manager\public\playlists\IPTV-UA-EPG-Merged-test.xml'
+$baselineMinutesNext24 = $null
+$baselineChannelsNow = $null
+if (Test-Path -LiteralPath $baselinePath -PathType Leaf) {
+    $baselineDoc = Read-XmltvFile $baselinePath
+    $baselineIndex = Get-ProgrammeIndex $baselineDoc $ids $from $until
+    $baselineMinutesNext24 = 0
+    $baselineChannelsNow = 0
+    foreach ($id in $ids) {
+        if (-not $baselineIndex.ContainsKey($id)) { continue }
+        $items = @($baselineIndex[$id].ToArray())
+        $baselineMinutesNext24 += (Get-CoverageMinutes $items $now $future24)
+        foreach ($item in $items) {
+            if ($item.Start -le $now -and $item.Stop -gt $now) {
+                $baselineChannelsNow++
+                break
+            }
+        }
+    }
+}
+
 $report = [ordered]@{
     status='STAGED_NOT_PUBLISHED'; generatedUtc=$now.ToString('o')
     m3uChannels=$ids.Count; epgChannels=$rows.Count
     channelsWithProgrammeNow=$coveredNow; programmes=$programmes
     totalMinutesCoveredNext24=($rows | Measure-Object CoverageNext24Min -Sum).Sum
+    baselineMinutesCoveredNext24=$baselineMinutesNext24
+    baselineChannelsWithProgrammeNow=$baselineChannelsNow
     sha256=(Get-FileHash $outputFile -Algorithm SHA256).Hash
     file=$outputFile
     details=@($rows)
@@ -334,6 +360,8 @@ Write-Host '=== SUMMARY ==='
     M3UChannels=$ids.Count; EPGChannels=$rows.Count
     ChannelsWithProgrammeNow=$coveredNow; Programmes=$programmes
     CoveredHoursAcrossAllChannels=[math]::Round(($report.totalMinutesCoveredNext24 / 60),1)
+    BaselineCoveredHoursNext24=if ($null -ne $baselineMinutesNext24) { [math]::Round(($baselineMinutesNext24 / 60),1) } else { 'N/A' }
+    BaselineChannelsWithProgrammeNow=if ($null -ne $baselineChannelsNow) { $baselineChannelsNow } else { 'N/A' }
     Preview=$outputFile; Report=$reportPath
     Publication='NONE'
 } | Format-List
