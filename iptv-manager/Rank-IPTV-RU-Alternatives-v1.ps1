@@ -98,7 +98,9 @@ foreach($channel in $catalog) {
         }
         if($chosen.Count -ge 2){break}
     }
-    $distinctHosts=@($available | Select-Object -ExpandProperty AlternativeHost -Unique)
+    $distinctHosts=@($available | Where-Object {
+        $_.AlternativeHost -cne $channel.CurrentHost
+    } | Select-Object -ExpandProperty AlternativeHost -Unique)
     $summary.Add([pscustomobject]@{
         Channel=$channel.Name
         CurrentHost=$channel.CurrentHost
