@@ -236,7 +236,12 @@ foreach($current in $ru){
         $key=$current.Id+'|'+$current.Name+'|'+[string]$alt.URLHash
         $days=if($history.ContainsKey($key)){$history[$key].Count}else{0}
         $flaggedCurrent=($current.Host -match '(^|\.)(cinerama\.uz|skygo\.mn)$')
-        $reason=if($requiresHeaders){
+        $reason=if($idOccurrences.ContainsKey($current.Id) -and
+            $idOccurrences[$current.Id] -gt 1){
+            # Repeated IDs can denote variants. Current nightly history
+            # cannot prove which variant produced a matching feed.
+            'SHARED_CANONICAL_ID_REQUIRES_MAPPING'
+        }elseif($requiresHeaders){
             'CLIENT_HEADERS_NOT_VERIFIED'
         }elseif(-not $flaggedCurrent){
             'CURRENT_SOURCE_NOT_MARKED_UNHEALTHY'
