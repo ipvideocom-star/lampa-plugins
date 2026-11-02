@@ -77,8 +77,9 @@ try {
     if ($oldMinutes -le 0 -or $oldNow -le 0) {
         throw 'Cannot establish a current baseline: refusing promotion'
     }
-    $minMinutes = [Math]::Max(10800, $oldMinutes * 0.90)
-    $minNow = [Math]::Max(7, [Math]::Ceiling($oldNow * 0.80))
+    # Never replace useful EPG with lower aggregate coverage or fewer live-now channels.
+    $minMinutes = [Math]::Max(10800, $oldMinutes)
+    $minNow = [Math]::Max(7, $oldNow)
     $passed = ($newMinutes -ge $minMinutes -and $newNow -ge $minNow)
 
     Write-Host '=== QUALITY GATE ==='
