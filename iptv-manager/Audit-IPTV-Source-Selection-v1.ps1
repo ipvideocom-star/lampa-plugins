@@ -343,6 +343,40 @@ foreach($entry in $results){
         $entry.Status='SHARED_MEDIA_ROUTE_REVIEW'
     }
 }
+# Generate a separate technically passing TEST M3U; this is NOT broadcast verified
+# and is NOT served through Lampa/Caddy. Each row comes from a staged source.
+$passM3u=Join-Path $dir ($Region+'-NETWORK-OK-TEST-NOT-PUBLISHED.m3u')
+$passEntries=[Collections.Generic.List[string]]::new()
+$passEntries.Add('#EXTM3U')
+$approved=@($results | Where-Object {
+    $_.Status -eq 'HLS_PROGRESS_OBSERVED' -and $_.MediaUriHash
+})
+$unique=[Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+foreach($ok in $approved){
+    $match=@($candidates | Where-Object {
+        $_.Channel -ceq $ok.Channel -and $_.UrlHash -eq $ok.UrlHash
+    })
+    if($match.Count -ne 1){throw "Ambiguous passing URL for $($ok.Channel)"}
+    $entry=$match[0]
+    $uniqueKey=$entry.Channel+'|'+$entry.URL
+    if(-not $unique.Add($uniqueKey)){continue}
+    $title=($entry.Channel -replace '[\r\n,",]',' ').Trim()
+    $id=([string]$entry.Id -replace '[\r\n"]','').Trim()
+    $passEntries.Add('#EXTINF:-1 tvg-id="'+$id+
+        '" group-title="SOURCE TEST '+$Region+'",'+$title+' ['+$entry.Host+']')
+    if($entry.UserAgent){
+        $passEntries.Add('#EXTVLCOPT:http-user-agent='+
+            ($entry.UserAgent -replace '[\r\n]',''))
+    }
+    if($entry.Referrer){
+        $passEntries.Add('#EXTVLCOPT:http-referrer='+
+            ($entry.Referrer -replace '[\r\n]',''))
+    }
+    $passEntries.Add($entry.URL)
+}
+[IO.File]::WriteAllText($passM3u,
+    ($passEntries.ToArray() -join [Environment]::NewLine)+[Environment]::NewLine,
+    [Text.UTF8Encoding]::new($false))
 $report=[ordered]@{
     Mode='SOURCE_SELECTION_NETWORK_ONLY_NOT_CONTENT_VERIFIED'
     DateUtc=[DateTime]::UtcNow.ToString('o')
@@ -350,6 +384,9 @@ $report=[ordered]@{
     SelectionReport=$sourceReportPath
     ReviewM3u=$testPath
     ReviewSha256=$reviewHash
+    NetworkPassingTestM3U=$passM3u
+    NetworkPassingTestEntries=$unique.Count
+    RealBroadcastVerified=$false
     ProductionSHA256=$baseHashes
     Total=$results.Count
     HlsSegmentOk=$success.Count
@@ -390,6 +427,7 @@ Write-Host '=== NETWORK AUDIT SUMMARY ==='
     Region=$Region
     CandidatesTested=$results.Count
     ChannelsWithProgress=$channels.Count
+    TestM3u=$passM3u
     HlsSegmentResponses=$success.Count
     HlsProgressObserved=$progress.Count
     SharedMediaRouteGroups=$shared.Count
