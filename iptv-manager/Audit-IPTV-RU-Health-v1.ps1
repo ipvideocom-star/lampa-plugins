@@ -34,9 +34,9 @@ function Read-Entries([string]$file) {
         if($line.StartsWith('#EXTINF:')){$header=$line;continue}
         if(-not $header -or -not $line -or $line.StartsWith('#')){continue}
         $match=[regex]::Match($header,'(?i)tvg-id="([^"]+)"')
-        if(-not $match.Success){throw "Missing tvg-id in $file"}
-        $id=$match.Groups[1].Value
         $name=$header.Substring($header.LastIndexOf(',')+1).Trim()
+        $id=if($match.Success){$match.Groups[1].Value}else{'name:'+$name.ToLowerInvariant()}
+        if(-not $name){throw "Empty M3U channel name in $file"}
         $items.Add([pscustomobject]@{
             Id=$id;Name=$name;Url=$line;Key=(Get-Hash ($id+'|'+$line))
         })
