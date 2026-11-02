@@ -69,7 +69,8 @@ foreach($source in $sourceUrls.GetEnumerator()) {
             $header -notmatch $blockName -and
             -not $uaIds.Contains($id) -and
             (Test-PublicUri $line)) {
-            $priority=(if ([Uri]$line -and ([Uri]$line).Scheme -eq 'https') { 10 } else { 0 })
+            $priority=0
+            if (([Uri]$line).Scheme -eq 'https') { $priority=10 }
             $candidates.Add([pscustomobject]@{
                 Id=$id;Name=$name;Url=$line;Source=$source.Key;Priority=$priority
             })
@@ -164,7 +165,9 @@ if ([regex]::Matches($ruText,'(?m)^#EXTINF:').Count -ne $selected.Count -or
     [regex]::Matches($combined,'(?m)^#EXTINF:').Count -ne $expectedCombined) {
     throw 'Final M3U channel count mismatch'
 }
-$files=[ordered]@{$ruName=$ruText;$combinedName=$combined}
+$files=[ordered]@{}
+$files[$ruName]=$ruText
+$files[$combinedName]=$combined
 foreach($entry in $files.GetEnumerator()) {
     [IO.File]::WriteAllText((Join-Path $stage $entry.Key),$entry.Value,[Text.UTF8Encoding]::new($false))
 }
