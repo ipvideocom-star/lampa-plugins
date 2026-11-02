@@ -140,7 +140,9 @@ try {
         if($matches.Count -ne 1){throw "Report/new M3U stream mismatch: $($item.Id)"}
     }
 
-    $payload=[ordered]@{$ru=$newRuText;$combined=$expandedText}
+    $payload=[ordered]@{}
+    $payload[$ru]=$newRuText
+    $payload[$combined]=$expandedText
     New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
     foreach($dest in $files) {
         $before[$dest]=New-Sha $dest
