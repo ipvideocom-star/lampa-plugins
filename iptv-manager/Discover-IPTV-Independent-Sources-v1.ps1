@@ -35,7 +35,7 @@ function Canonical([string]$s){
 function CleanName([string]$s){
   $s=$s.ToLowerInvariant()
   $s=$s -replace '(?i)\s*\[(?:not 24/7|geo.blocked|hd|sd|fhd|4k|576p|720p|1080p|2160p)\]',''
-  $s=$s -replace '(?i)\s*\((?:576[i|p]|720p|1080p|2160p|4k|hd|sd)\)',''
+  $s=$s -replace '(?i)\s*\((?:576i|576p|720p|1080p|2160p|4k|hd|sd)\)',''
   return ($s -replace '[^\p{L}\p{Nd}]','').Trim()
 }
 function ShortHash([string]$s){
@@ -66,7 +66,7 @@ function New-Entry([string]$id,[string]$name,[string]$url,
   if(-not [Uri]::TryCreate($url,[UriKind]::Absolute,[ref]$uri)){return $null}
   if($uri.Scheme -notin @('http','https') -or $uri.UserInfo){return $null}
   $hostname=$uri.DnsSafeHost.ToLowerInvariant()
-  if(-not $hostname -or Is-Restricted $name $group){return $null}
+  if(-not $hostname -or (Is-Restricted $name $group)){return $null}
   return [pscustomobject]@{
     Id=(Canonical $id)
     Name=$name
@@ -239,8 +239,132 @@ foreach($item in $clean){
       })
     }
   }else{
-    $country=if($item.Region -eq 'RU' -or $item.Region -eq 'UA'){$item.Region}else{''}
-    if(-not $country -and $item.Id -match '(?i)\.(ru|ua)$'){$country=$Matches[1].ToUpperInvariant()}
+    $country=if($item.Id -match '(?i)\.(ru|ua)
+    if($country -in @('RU','UA')){
+      $unmatched.Add([pscustomobject]@{
+        Name=$item.Name;Id=$item.Id;Region=$country
+        Source=$item.Source;Host=$item.Host;Kind=$item.Kind
+        Url=$item.Url;UrlHash=$item.UrlHash
+        UserAgent=$item.UserAgent;Referrer=$item.Referrer
+        Quarantined=$false
+        ContentVerified=$false;NetworkVerified=$false
+      })
+    }
+  }
+}
+# A candidate listed in several source indexes is still ONE upstream URL.
+$matchedAll=@($matched | Where-Object {$_.IndependentHost})
+$perChannel=[Collections.Generic.List[object]]::new()
+$testCandidates=[Collections.Generic.List[object]]::new()
+foreach($group in ($matchedAll | Group-Object Region,Target)){
+  $cands=@($group.Group | Sort-Object Source,CandidateHost)
+  $hosts=@($cands | ForEach-Object {$_.CandidateHost} | Sort-Object -Unique)
+  $exact=@($cands | Where-Object {$_.Match -eq 'EXACT_ID'})
+  $perChannel.Add([pscustomobject]@{
+    Channel=$cands[0].Target;Region=$cands[0].Region
+    CurrentHost=$cands[0].CurrentHost
+    Candidates=$cands.Count;IndependentHosts=$hosts.Count
+    ExactIdCandidates=$exact.Count
+    Sources=@($cands | ForEach-Object {$_.Source} | Sort-Object -Unique)
+  })
+  $usedHost=[Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+  foreach($c in ($cands | Sort-Object @{Expression={if($_.Match -eq 'EXACT_ID'){0}else{1}}},Source)){
+    if($usedHost.Add($c.CandidateHost)){
+      $testCandidates.Add([pscustomobject]@{
+        Name=$c.Target;Id=$c.TargetId;Region=$c.Region
+        Source=$c.Source;Host=$c.CandidateHost;Kind=$c.Kind
+        Url=$c.Url;UrlHash=$c.UrlHash
+        UserAgent=$c.UserAgent;Referrer=$c.Referrer;Quarantined=$false
+        Match=$c.Match
+      })
+    }
+    if($usedHost.Count -ge $MaxAlternativesPerChannel){break}
+  }
+}
+$new=[Collections.Generic.List[object]]::new()
+foreach($region in @('RU','UA')){
+  $used=[Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+  $ordered=@($unmatched | Where-Object {$_.Region -eq $region} |
+    Sort-Object @{Expression={switch -Regex ($_.Source) {
+      '^FREE-TV$' {0;break}
+      '^DEARBULUT' {1;break}
+      '^NGRCH' {2;break}
+      '^ADAM' {3;break}
+      default {4}
+    }}},Name)
+  foreach($item in $ordered){
+    $name=CleanName $item.Name
+    if($name.Length -lt 5){continue}
+    $key=if($item.Id){'ID:'+ $item.Id}else{'NAME:'+ $name}
+    if(-not $used.Add($key)){continue}
+    $new.Add($item)
+    if($used.Count -ge $MaxNewPerCountry){break}
+  }
+}
+foreach($p in $hashes.Keys){
+  if((Get-FileHash -LiteralPath $p -Algorithm SHA256).Hash -ne $hashes[$p]){
+    throw "Published M3U changed during source discovery: $p"
+  }
+}
+$matchFile=Join-Path $dir 'alternatives-for-131.json'
+$newFile=Join-Path $dir 'new-channels-for-review.json'
+$reviewRu=Join-Path $dir 'RU-EXTERNAL-SOURCES-TEST-NOT-PUBLISHED.m3u'
+$reviewUa=Join-Path $dir 'UA-EXTERNAL-SOURCES-TEST-NOT-PUBLISHED.m3u'
+$newRu=Join-Path $dir 'RU-NEW-TEST-NOT-PUBLISHED.m3u'
+$newUa=Join-Path $dir 'UA-NEW-TEST-NOT-PUBLISHED.m3u'
+$reportFile=Join-Path $dir 'report.json'
+[IO.File]::WriteAllText($matchFile,($matched|ConvertTo-Json -Depth 8),[Text.UTF8Encoding]::new($false))
+[IO.File]::WriteAllText($newFile,($new|ConvertTo-Json -Depth 8),[Text.UTF8Encoding]::new($false))
+Write-ReviewM3U $reviewRu @($testCandidates | Where-Object {$_.Region -eq 'RU'})
+Write-ReviewM3U $reviewUa @($testCandidates | Where-Object {$_.Region -eq 'UA'})
+Write-ReviewM3U $newRu @($new | Where-Object {$_.Region -eq 'RU'})
+Write-ReviewM3U $newUa @($new | Where-Object {$_.Region -eq 'UA'})
+$report=[ordered]@{
+  Status='STAGED_SOURCE_INVENTORY_NO_PUBLICATION'
+  TimeUTC=[DateTime]::UtcNow.ToString('o')
+  PublishedRU=47;PublishedUA=84;PublishedCombined=131
+  AllIndexed=$entries.Count
+  HlsAfterQuarantine=$clean.Count
+  QuarantinedEntries=$excluded
+  YouTubeLinksHeldSeparately=$youtube
+  AlternativeURLsForPublished=@($matched).Count
+  IndependentHostAlternatives=@($matchedAll).Count
+  ChannelsWithIndependentAlternatives=$perChannel.Count
+  ReviewedTestCandidates=$testCandidates.Count
+  NewRUCandidates=@($new | Where-Object {$_.Region -eq 'RU'}).Count
+  NewUACandidates=@($new | Where-Object {$_.Region -eq 'UA'}).Count
+  SourceReports=@($downloads)
+  ChannelCoverage=@($perChannel)
+  TestRu=$reviewRu;TestUa=$reviewUa
+  NewRu=$newRu;NewUa=$newUa
+  ExistingCandidatesJson=$matchFile;NewCandidatesJson=$newFile
+  PublishedHashes=$hashes
+  NetworkTested=$false
+  RealBroadcastVerified=$false
+  ProductionChanged=$false
+}
+[IO.File]::WriteAllText($reportFile,($report|ConvertTo-Json -Depth 8),[Text.UTF8Encoding]::new($false))
+Write-Host '=== INDEPENDENT SOURCE COVERAGE OF EXISTING CHANNELS ==='
+$perChannel | Sort-Object Region,Channel |
+  Select-Object Region,Channel,IndependentHosts,ExactIdCandidates |
+  Format-Table -AutoSize
+Write-Host '=== SOURCE-POOL SUMMARY ==='
+[pscustomobject]@{
+  Catalogs=$sources.Count
+  WorkingCatalogDownloads=@($downloads | Where-Object {$_.Available}).Count
+  Indexed=$entries.Count
+  Quarantined=$excluded
+  ExistingChannelsWithAlternativeHosts=$perChannel.Count
+  IndependentURLCandidates=@($matchedAll).Count
+  NewRU=@($new | Where-Object {$_.Region -eq 'RU'}).Count
+  NewUA=@($new | Where-Object {$_.Region -eq 'UA'}).Count
+  Report=$reportFile
+  TestRU=$reviewRu
+  TestUA=$reviewUa
+  Publication='NONE'
+} | Format-List
+Write-Host 'IPTV SOURCE SELECTION: COMPLETE (UNTESTED PREVIEW ONLY)'
+){$Matches[1].ToUpperInvariant()}elseif($item.Region -in @('RU','UA')){$item.Region}else{''}
     if($country -in @('RU','UA')){
       $unmatched.Add([pscustomobject]@{
         Name=$item.Name;Id=$item.Id;Region=$country
