@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "project": "IPTV Manager RU/UA/RUS public-channel discovery",
+  "createdUtc": "2026-11-03",
+  "state": "SOURCE_CANDIDATES_ONLY_NO_FETCH_OR_NETWORK_PROBES",
+  "purpose": "Stage future IPTV source discovery before HLS gateway",
+  "knownOriginalCatalog": "W2019S 814 checked; 347 network-confirmed from old iptv-org four-feed catalog",
+  "knownRecentReport": "P1/P2 85 checks; 22 HLS-progress URLs; 21 unique channel names; 13 no-progress; 50 failed",
+  "alreadyUsedFamilies": [
+    "iptv-org countries/ua.m3u",
+    "iptv-org countries/ru.m3u",
+    "iptv-org languages/ukr.m3u",
+    "iptv-org languages/rus.m3u"
+  ],
+  "accessFilter": [
+    "public/free streams only",
+    "no adult streams",
+    "RU UA RUS language and culturally relevant channels; exclude distant irrelevant regions",
+    "no subscription/token extraction or paywall bypass"
+  ],
+  "validationPipeline": [
+    "fetch feed with size/time limits, no full stream downloads",
+    "validate URI and reject private IPs and suspicious redirects",
+    "deduplicate by normalized URL hash and tvg-id/channel identity",
+    "compare with original 814, W2019S 347 and current production playlists before network tests",
+    "mark source family, genre, quality, language, logo, tvg-id and EPG status",
+    "probe only novel eligible candidates from W2022 direct, then W2019S direct where needed",
+    "separate HLS progress, segment without progress, transport failures, content unverified",
+    "stage reports, never auto-publish to current production"
+  ],
+  "sourceCandidates": [
+    {
+      "id": "ngrch-ru",
+      "priority": 1,
+      "family": "ngrch",
+      "kind": "independent_aggregator",
+      "url": "https://ngrch.github.io/iptv/ru.m3u",
+      "scope": "RU/RUS",
+      "note": "Specialized public Russian-language playlist; inspect provenance/rights per channel"
+    },
+    {
+      "id": "ngrch-music",
+      "priority": 1,
+      "family": "ngrch",
+      "kind": "independent_aggregator",
+      "url": "https://ngrch.github.io/iptv/music.m3u",
+      "scope": "RU/RUS",
+      "note": "Music and radio; only include TV-compatible public streams"
+    },
+    {
+      "id": "ngrch-cartoons",
+      "priority": 1,
+      "family": "ngrch",
+      "kind": "independent_aggregator",
+      "url": "https://ngrch.github.io/iptv/cartoons.m3u",
+      "scope": "RU/RUS",
+      "note": "Cartoon channels; require public/free access"
+    },
+    {
+      "id": "denxv-full",
+      "priority": 1,
+      "family": "denxvofficial",
+      "kind": "independent_aggregator",
+      "url": "https://raw.githubusercontent.com/denxvofficial/IPTV/refs/heads/main/iptv.m3u",
+      "scope": "RU/RUS",
+      "note": "Full RU-language selection; check links, permissions and actual streams"
+    },
+    {
+      "id": "denxv-curated",
+      "priority": 2,
+      "family": "denxvofficial",
+      "kind": "overlap_curated_subset",
+      "url": "https://raw.githubusercontent.com/denxvofficial/IPTV/refs/heads/main/iptv-top.m3u",
+      "scope": "RU/RUS",
+      "note": "Curated subset of full feed, use to increase channel ranking, not unique stream counts"
+    },
+    {
+      "id": "free-tv",
+      "priority": 1,
+      "family": "free-tv",
+      "kind": "independent_aggregator",
+      "url": "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8",
+      "scope": "UA/RU/RUS metadata filter",
+      "note": "Official/free-stream-focused; global list, filter before probes"
+    },
+    {
+      "id": "freecasthub",
+      "priority": 2,
+      "family": "freecasthub",
+      "kind": "independent_aggregator_unverified",
+      "url": "https://raw.githubusercontent.com/freecasthub/public-iptv/main/playlist.m3u",
+      "scope": "UA/RU/RUS metadata filter",
+      "note": "Project claims official publicly available streams; independent verification still required"
+    },
+    {
+      "id": "iptv-org-by",
+      "priority": 2,
+      "family": "iptv-org",
+      "kind": "adjacent_country_same_upstream",
+      "url": "https://iptv-org.github.io/iptv/countries/by.m3u",
+      "scope": "Belarus/RUS metadata filter",
+      "note": "Likely duplicate of iptv-org root; retrieve only missing URL or channel"
+    },
+    {
+      "id": "iptv-org-kz",
+      "priority": 2,
+      "family": "iptv-org",
+      "kind": "adjacent_country_same_upstream",
+      "url": "https://iptv-org.github.io/iptv/countries/kz.m3u",
+      "scope": "Kazakhstan/RUS metadata filter",
+      "note": "Retain Russian-language only"
+    },
+    {
+      "id": "iptv-org-md",
+      "priority": 2,
+      "family": "iptv-org",
+      "kind": "adjacent_country_same_upstream",
+      "url": "https://iptv-org.github.io/iptv/countries/md.m3u",
+      "scope": "Moldova/RUS metadata filter",
+      "note": "Retain Russian-language only"
+    },
+    {
+      "id": "iptv-org-movies",
+      "priority": 3,
+      "family": "iptv-org",
+      "kind": "category_same_upstream",
+      "url": "https://iptv-org.github.io/iptv/categories/movies.m3u",
+      "scope": "UA/RU/RUS metadata filter",
+      "note": "Same underlying source as current iptv-org; check missing tags, not duplicate catalog"
+    },
+    {
+      "id": "iptv-org-sports",
+      "priority": 3,
+      "family": "iptv-org",
+      "kind": "category_same_upstream",
+      "url": "https://iptv-org.github.io/iptv/categories/sports.m3u",
+      "scope": "UA/RU/RUS metadata filter",
+      "note": "Same upstream, no claim of new channels"
+    },
+    {
+      "id": "iptv-org-news",
+      "priority": 3,
+      "family": "iptv-org",
+      "kind": "category_same_upstream",
+      "url": "https://iptv-org.github.io/iptv/categories/news.m3u",
+      "scope": "UA/RU/RUS metadata filter",
+      "note": "Same upstream, no claim of new channels"
+    }
+  ],
+  "epgReference": "https://github.com/iptv-org/epg",
+  "notes": "No playlist input has been fetched or evaluated by creating this registry; do not treat feed lists or source claims as channel verification."
+}
