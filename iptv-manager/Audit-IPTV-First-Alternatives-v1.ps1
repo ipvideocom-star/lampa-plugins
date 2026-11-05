@@ -33,12 +33,12 @@ $items=@(
         if(-not [Uri]::TryCreate([string]$r.URL,[UriKind]::Absolute,[ref]$uri) -or
            $uri.Scheme -notin @('http','https') -or $uri.UserInfo){continue}
         $key=[Convert]::ToHexString(
-            [Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($uri.AbsoluteUri))
+            [Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes([string]$r.URL))
         ).Substring(0,16)
         if($key -cne [string]$r.URLKey){throw "Discovery URLKey mismatch: $($r.URLKey)"}
         [pscustomobject]@{
             Variant=$variant;Channel=[string]$r.Channel;URLKey=$key
-            Url=$uri.AbsoluteUri;Host=$uri.DnsSafeHost;Feed=[string]$r.Feed
+            Url=[string]$r.URL;Host=$uri.DnsSafeHost;Feed=[string]$r.Feed
             UserAgent=[string]$r.UserAgent;Referrer=[string]$r.Referrer
         }
     }
@@ -156,6 +156,7 @@ $results=@(
             try{
                 $handler=[Net.Http.HttpClientHandler]::new()
                 $handler.AllowAutoRedirect=$false
+                $handler.UseProxy=$false
                 $handler.UseCookies=$false
                 $client=[Net.Http.HttpClient]::new($handler)
                 $client.Timeout=[TimeSpan]::FromSeconds($timeout+2)
