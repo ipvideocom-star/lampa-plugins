@@ -68,7 +68,7 @@ foreach($key in $approved.Keys){
  $entry=$entries[0]
  if((Hash16 ([string]$entry.URL)) -cne $key){throw "URL fingerprint mismatch $key"}
  $uri=$null
- if(-not[Uri]::TryCreate([string]$entry.URL,[UriKind]::Absolute,[ref]$uri) -or $uri.Scheme -notin @('http','https') -or $uri.UserInfo -or $uri.DnsSafeHost -notin $hosts -or [string]$entry.Channel -notlike 'Первый*'){
+ if(-not [Uri]::TryCreate([string]$entry.URL,[UriKind]::Absolute,[ref]$uri) -or $uri.Scheme -notin @('http','https') -or $uri.UserInfo -or $uri.DnsSafeHost -notin $hosts -or [string]$entry.Channel -notlike 'Первый*'){
   throw "Unexpected candidate host or name $key"
  }
  $append.Add([pscustomobject][ordered]@{Index=$id;Channel=$names[$id];URL=[string]$entry.URL;URLKey=$key;Route='DIRECT_W2022'})
