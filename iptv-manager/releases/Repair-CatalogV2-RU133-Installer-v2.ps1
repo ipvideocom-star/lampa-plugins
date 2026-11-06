@@ -42,12 +42,15 @@ $newC=@'
  }
 '@
 $source=[IO.File]::ReadAllText($original,[Text.Encoding]::UTF8)
-foreach($pair in @(@($oldA,$newA),@($oldB,$newB),@($oldC,$newC))){
- if($source.Split([string[]]@($pair[0]),[StringSplitOptions]::None).Count -ne 2){
+function ReplaceOnce([string]$text,[string]$old,[string]$replacement){
+ if([regex]::Matches($text,[regex]::Escape($old)).Count -ne 1){
   throw 'Installer patch anchor not unique; no changes made'
  }
- $source=$source.Replace([string]$pair[0],[string]$pair[1])
+ return $text.Replace($old,$replacement)
 }
+$source=ReplaceOnce $source $oldA $newA
+$source=ReplaceOnce $source $oldB $newB
+$source=ReplaceOnce $source $oldC $newC
 [byte[]]$bytes=[Text.UTF8Encoding]::new($false).GetBytes($source)
 $actual=[Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($bytes))
 if($actual -cne $expectedFixed){throw 'Fixed installer SHA256 mismatch; no changes made'}
