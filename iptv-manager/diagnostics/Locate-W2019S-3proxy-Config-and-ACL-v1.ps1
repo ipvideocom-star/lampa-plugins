@@ -104,7 +104,7 @@ if(@($listeners|Where-Object { $_.LocalAddress -eq $ip -or $_.LocalAddress -eq '
   Write-Host 'curl.exe unavailable; HTTP/CONNECT checks skipped'
  }else{
   foreach($t in @(@('HTTP','http://example.com/'),@('HTTPS_CONNECT','https://example.com/'))){
-   $args=@('--silent','--noproxy','','--proxy',('http://'+$ip+':33128'),
+   $args=@('--silent','--noproxy','localhost','--proxy',('http://'+$ip+':33128'),
       '--connect-timeout','3','--max-time','9','--output','NUL',
       '--write-out','STAT|%{http_code}|%{http_connect}|%{time_total}',[string]$t[1])
    $result=@(& curl.exe @args 2>$null);$exit=$LASTEXITCODE
