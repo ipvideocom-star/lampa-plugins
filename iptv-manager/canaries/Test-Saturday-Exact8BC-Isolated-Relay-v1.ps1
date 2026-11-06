@@ -71,7 +71,6 @@ if(-not $starter.Contains('IPTVRelayPilot02') -or -not $starter.Contains('[strin
 $starter=$starter.Replace('IPTVRelayPilot02','IPTVRelayPilot08').Replace('9144','9146')
 $canaryStart=Join-Path $folder 'Start-IPTV-HLS-Relay-v02.ps1'
 [IO.File]::WriteAllText($canaryStart,$starter,[Text.UTF8Encoding]::new($false))
-Add-Type -Path $canaryCs -ErrorAction Stop
 
 $token=[Convert]::ToHexString([Security.Cryptography.RandomNumberGenerator]::GetBytes(32)).ToLowerInvariant()
 $tokenFile=Join-Path $folder 'private-access-token.txt'
