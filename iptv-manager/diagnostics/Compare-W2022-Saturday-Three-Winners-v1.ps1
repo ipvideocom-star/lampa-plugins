@@ -8,13 +8,13 @@ $ProgressPreference='SilentlyContinue'
 Write-Host '=== W2022 SATURDAY EXACT-WINNER RETEST ==='
 Write-Host 'Three W2019S URL keys; direct only, no proxy and no video saved.'
 if(-not(Get-Command curl.exe -ErrorAction SilentlyContinue)){throw 'curl.exe not installed'}
-$root=Join-Path $env:ProgramData 'IPTV-Manager-Diagnostics'
+$root='C:\ReservLampac\IPTVPlus\RU-Network-Diagnostics'
 New-Item -ItemType Directory -Path $root -Force|Out-Null
 $stamp=(Get-Date -Format 'yyyyMMdd-HHmmss')+'-'+[guid]::NewGuid().ToString('N').Substring(0,8)
 $folder=Join-Path $root $stamp
 New-Item -ItemType Directory -Path $folder -Force|Out-Null
-$report=Join-Path $folder 'Saturday-W2019S-Direct.csv'
-$summary=Join-Path $folder 'Saturday-W2019S-Summary.txt'
+$report=Join-Path $folder 'Saturday-W2022-ExactThree.csv'
+$summary=Join-Path $folder 'Saturday-W2022-ExactThree-Summary.txt'
 $sha=[Security.Cryptography.SHA256]::Create()
 function Fingerprint([string]$s) {
  $bytes=[Text.Encoding]::UTF8.GetBytes($s)
@@ -202,7 +202,7 @@ $winners=@($results|Group-Object URLKey|Where-Object{
 $text=[Collections.Generic.List[string]]::new()
  $text.Add('W2022 SATURDAY: SAME THREE URLS THAT PASSED W2019S')
 $text.Add('No 3proxy usage. No video retained. Two full segments >=1.5x real time required.')
-$text.Add('Not compared with identical W2022 URLs unless URLKey matches a local report.')
+$text.Add('W2019S baseline keys: 8BC1F6B3E3DB734C, 7DA60C9FEA1B41AE, 81744C2A09AC09DA.')
 $text.Add("Sources found=$($candidates.Count); tested=$($chosen.Count); passing=$($winners.Count)")
 foreach($w in $winners){
  $minRatio=($w.Group|Measure-Object RealtimeRatio -Minimum).Minimum
