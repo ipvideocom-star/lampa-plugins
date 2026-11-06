@@ -87,7 +87,7 @@ $seen=[Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnore
 foreach($feed in $feeds){
  $f=CurlFetch $feed.Url $false '' ''
  if(-not $f.Ok){Write-Host ("FEED {0}: HTTP={1} EXIT={2}; skipped" -f $feed.Name,$f.Code,$f.Exit);continue}
- $name='';$agent='';$referer='';$matches=0
+ $name='';$agent='';$referer='';$matchCount=0
  foreach($raw in ($f.Text -split '\r?\n')){
   $line=$raw.Trim()
   if($line.StartsWith('#EXTINF:')){
@@ -100,7 +100,7 @@ foreach($feed in $feeds){
   if(-not $name -or $line.StartsWith('#') -or $line -notmatch '^https?://'){continue}
   $normalized=($name.ToLowerInvariant() -replace '\s*(?:hd|fhd|sd|uhd|4k|1080p|720p)\s*$','').Trim()
   if($normalized -match '^\u0441\u0443\u0431\u0431\u043e\u0442\u0430!?$' -and (IsPublicUrl $line)){
-   $matches++
+   $matchCount++
    if($seen.Add($line)){
     $uri=[Uri]$line
     $candidates.Add([pscustomobject]@{
@@ -111,7 +111,7 @@ foreach($feed in $feeds){
   }
   $name=''
  }
- Write-Host ("FEED {0}: HTTP=200 matching entries={1}" -f $feed.Name,$matches)
+ Write-Host ("FEED {0}: HTTP=200 matching entries={1}" -f $feed.Name,$matchCount)
 }
 $chosen=[Collections.Generic.List[object]]::new()
 $hostCounts=@{}
