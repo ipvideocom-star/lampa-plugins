@@ -182,7 +182,7 @@ try{
  for($round=1;$round -le 3;$round++){
   $m=Find-Segments $url
   if(-not $m.OK){
-   Write-Host ("ROUND {0}: HLS error {1}" -f $round,$m.Issue)
+    Write-Host ('ROUND ' + $round + ': HLS error ' + $m.Issue)
    $rows.Add([pscustomobject]@{Round=$round;Segment=0;HTTP='NOT_TESTED';Exit=-1;Bytes=0;Seconds=0;Duration=0;SpeedRatio=0;Pass=$false;Issue=$m.Issue})
   }else{
    for($i=0;$i -lt 2;$i++){
@@ -195,8 +195,7 @@ try{
      Seconds=[Math]::Round($t.Time,2);Duration=[Math]::Round($part.Duration,2)
      SpeedRatio=[Math]::Round($ratio,2);Pass=$pass;Issue=''
     })
-    Write-Host ("ROUND {0} SEGMENT {1}: HTTP={2}, exit={3}, bytes={4}, speed={5:N2}x, pass={6}" -f
-       $round,$i+1,$t.Code,$t.Exit,$t.Bytes,$ratio,$pass)
+     Write-Host ('ROUND ' + $round + ' SEGMENT ' + ($i + 1) + ': HTTP=' + $t.Code + ', exit=' + $t.Exit + ', bytes=' + $t.Bytes + ', speed=' + [Math]::Round($ratio,2) + 'x, pass=' + $pass)
    }
   }
   if($round -lt 3){Start-Sleep -Seconds 6}
@@ -208,7 +207,12 @@ try{
  Write-Host ("Passing complete segments: {0}/6" -f $passCount)
  Write-Host "REPORT: $csv"
  Write-Host 'Samsung and production IPTV were not modified.'
+}catch{
+ Write-Host ('CANARY_ERROR: ' + $_.Exception.Message)
+ Write-Host ('CANARY_ERROR_AT_LINE: ' + $_.InvocationInfo.ScriptLineNumber)
+ throw
 }finally{
+ if($rows.Count -gt 0){$rows | Export-Csv -LiteralPath $csv -Encoding UTF8 -NoTypeInformation}
  if($proc){
   $proc.Refresh()
   if(-not $proc.HasExited){Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue}
