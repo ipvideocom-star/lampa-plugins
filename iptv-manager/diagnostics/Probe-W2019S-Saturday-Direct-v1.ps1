@@ -99,7 +99,7 @@ foreach($feed in $feeds){
   if($line -match '^#EXTVLCOPT:http-referrer=(.*)$'){$referer=$Matches[1];continue}
   if(-not $name -or $line.StartsWith('#') -or $line -notmatch '^https?://'){continue}
   $normalized=($name.ToLowerInvariant() -replace '\s*(?:hd|fhd|sd|uhd|4k|1080p|720p)\s*$','').Trim()
-  if($normalized -match '^\u0441\u0443\u0431\u0431\u043e\u0442\u0430!? -and (IsPublicUrl $line)){
+  if($normalized -match '^\u0441\u0443\u0431\u0431\u043e\u0442\u0430!?$' -and (IsPublicUrl $line)){
    $matches++
    if($seen.Add($line)){
     $uri=[Uri]$line
