@@ -1,0 +1,24 @@
+name: Validate IPTV+ hierarchy preview
+on:
+  pull_request:
+    paths:
+      - "iptv-plus/iptv-plus-v1.2.2-hierarchy-preview.js"
+      - "iptv-plus/tests/test-hierarchy.js"
+      - ".github/workflows/validate-iptv-hierarchy.yml"
+  push:
+    branches: [main]
+    paths:
+      - "iptv-plus/iptv-plus-v1.2.2-hierarchy-preview.js"
+      - "iptv-plus/tests/test-hierarchy.js"
+      - ".github/workflows/validate-iptv-hierarchy.yml"
+permissions:
+  contents: read
+jobs:
+  test-hierarchy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate preview JS syntax
+        run: node --check iptv-plus/iptv-plus-v1.2.2-hierarchy-preview.js
+      - name: Check taxonomy and regression keys
+        run: node iptv-plus/tests/test-hierarchy.js
