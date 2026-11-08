@@ -1,9 +1,9 @@
 /* IPTV+ Samsung/MSX v11 rollback: use ONLY after v11 preview if needed.
-   Reverts only v23 managed playlist and v22 managed guide. */
+   Reverts only v22 test playlist and v22 managed guide. */
 (function () {
     'use strict';
     var approved = ['e546300d', '1b192dce'];
-    var fromM3u = 'https://lampa.v6.army/iptv/playlists/IPTV-Samsung-RelayEPG-v23.m3u';
+    var fromM3u = 'https://lampa.v6.army/iptv/playlists/IPTV-Samsung-TEST-v22.m3u';
     var toM3u = 'https://lampa.v6.army/iptv/pilot/IPTV-UA-RU-Relay-v02-257.m3u';
     var fromXml = 'https://lampa.v6.army/iptv/playlists/IPTV-Samsung-Guide-v22.xml';
     var toXml = 'https://lampa.v6.army/iptv/playlists/IPTV-UA-RU-EPG-Pilot-v1.xml';
