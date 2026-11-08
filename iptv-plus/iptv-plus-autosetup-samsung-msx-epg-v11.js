@@ -1,18 +1,17 @@
-/* IPTV+ Samsung/MSX EPG overlay v11 (2026-11-08).
+/* IPTV+ Samsung/MSX EPG preview v11 (2026-11-08).
    Scoped to the SAME two Samsung UID fingerprints used by v10.
    Only migrates known managed IPTV+ playlist/EPG values; no UID values,
    stream credentials or user-customized URLs are embedded. */
 (function () {
     'use strict';
     var approved = ['e546300d', '1b192dce'];
-    var newPlaylist = 'https://lampa.v6.army/iptv/playlists/IPTV-Samsung-RelayEPG-v23.m3u';
+    var newPlaylist = 'https://lampa.v6.army/iptv/playlists/IPTV-Samsung-TEST-v22.m3u';
     var newEpg = 'https://lampa.v6.army/iptv/playlists/IPTV-Samsung-Guide-v22.xml';
     var oldPlaylists = [
         'https://lampa.v6.army/iptv/playlists/IPTV-UA.m3u',
         'https://lampa.v6.army/iptv/playlists/IPTV-UA-RU-Pilot-v1.m3u',
         'https://lampa.v6.army/iptv/pilot/IPTV-UA-RU-Relay-v02-257.m3u',
         'https://lampa.v6.army/iptv/playlists/IPTV-Samsung-TEST.m3u',
-        'https://lampa.v6.army/iptv/playlists/IPTV-Samsung-TEST-v22.m3u',
         newPlaylist
     ];
     var oldEpgs = [
@@ -61,7 +60,7 @@
                 Lampa.Storage.set('iptv_plus_playlist', newPlaylist);
             }
             finished = true;
-            console.log('IPTV+ Samsung/MSX v11: managed relay + EPG preview selected');
+            console.log('IPTV+ Samsung/MSX v11: managed v2.2 test playlist + EPG selected');
         } catch (error) {
             console.warn('IPTV+ Samsung/MSX v11: setup retry after error', error);
         }
