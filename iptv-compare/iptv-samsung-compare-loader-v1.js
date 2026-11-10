@@ -13,7 +13,7 @@
   var M3U = 'https://lampa.v6.army/iptv/playlists/IPTV-Samsung-TEST-v22.m3u';
   var XMLTV = 'https://lampa.v6.army/iptv/playlists/IPTV-Samsung-Guide-v22.xml';
   var MAX_TV = 'https://maks-mk.github.io/tv.js';
-  var LIPTV = 'https://ipvideocom-star.github.io/lampa-plugins/iptv-compare/lampa-iptv-third-party-comparison-v1.js';
+  var LIPTV = 'https://cdn.jsdelivr.net/gh/ipvideocom-star/lampa-plugins@06bcdfe226968502bd20ce330dee513549c2a15e/iptv-compare/lampa-iptv-third-party-comparison-v1.js';
   var attempts = 0, started = false;
 
   function fp(value) {
