@@ -20,11 +20,31 @@
 | № | Вариант | Источник | Пользовательская M3U | Внешняя EPG | Риски / наблюдения |
 |---|---|---|---|---|---|
 | 1 | IPTV+ (контроль) | наша текущая конфигурация, 1.2.x | да | да, текущий XMLTV | оставить без изменений |
-| 2 | MaxTV | https://github.com/maks-mk/lampatv, `https://maks-mk.github.io/tv.js` | да | **требует проверки**: текущий код использует API `epg.rootu.top` | собственный пункт меню `MaxTV`, имена и storage в namespace `max_iptv`; внешний EPG не обещать |
+| 2 | MaxTV | https://github.com/maks-mk/lampatv, pinned JS `https://cdn.jsdelivr.net/gh/maks-mk/lampatv@15f9841b568fb1c6cca97aa1dcb3a615918d06c0/tv.js` | да | **требует проверки**: текущий код использует API `epg.rootu.top` | собственный пункт меню `MaxTV`, имена и storage в namespace `max_iptv`; внешний EPG не обещать |
 | 3 | Lampa IPTV (smackftw) | https://github.com/smackftw/lampa_iptv, `dist/lampa-iptv.js` | да | да: Custom URL или EPG из M3U | исходник `src/index.js` автоматически открывает IPTV при старте — нужно отключить этот побочный эффект в тестовой копии; меню `IPTV` можно переименовать |
 | 4 | резерв | `https://plugin.rootu.top/tv.js` — независимый кандидат после проверки кода | вероятно да | нужно подтвердить | не устанавливать без source audit; возможно использует `epg.rootu.top` |
 
 **CUB IPTV исключён по предыдущему решению пользователя.**
+
+
+## Фактическая конфигурация после успешной установки сравнения v1.2 (10.11.2026)
+
+Серверный отчёт `RESULT: READY_FOR_THREE_PLUGIN_SAMSUNG_TEST` подтвердил, что policy entry `iptv_compare_v12` добавлена, а Policy Server выдаёт её двум UID Samsung. Это **не** подтверждает, что все JS реально запустились на телевизоре (Samsung пока не проверен).
+
+| Клиент | Хранимый параметр | Назначенное значение |
+|---|---|---|
+| IPTV+ | `iptv_plus_playlist` | `https://lampa.v6.army/iptv/playlists/IPTV-Samsung-TEST-v22.m3u` (через существующий Auto Setup v11) |
+| IPTV+ | `iptv_plus_epg` | `https://lampa.v6.army/iptv/playlists/IPTV-Samsung-Guide-v22.xml` (v11) |
+| MaxTV | `max_iptv_list_url_0` | тот же `IPTV-Samsung-TEST-v22.m3u` |
+| MaxTV | EPG | **не настраивается на тот же XMLTV**: upstream MaxTV использует `epg.rootu.top/api/epg` и не содержит конфигурации custom XMLTV |
+| IPTV 3 | `liptv_m3u_url` | тот же `IPTV-Samsung-TEST-v22.m3u` |
+| IPTV 3 | `liptv_epg_url` / `liptv_epg_source` | тот же `IPTV-Samsung-Guide-v22.xml` / `custom` |
+
+Все параметры вторичных клиентов назначает загрузчик `iptv-compare/iptv-samsung-compare-loader-v12.js`, с условием UID по прежним двум fingerprints и **без** замены пользовательских custom URLs. Назначение происходит **на клиенте при запуске Lampa**, не непосредственно в настройках телевизора с сервера.
+
+**Ограничение честного сравнения:** плейлист и видео одинаковы, но сравнение EPG одинаковым XMLTV возможно только между IPTV+ и IPTV 3. EPG MaxTV считается отдельной функциональностью этого клиента, а не ошибкой EPG v22. Дополнительные постоянные `IPTV-UA.m3u` и `IPTV-RU-Pilot-v1.m3u` намеренно не подключены одновременно: исходные MaxTV и IPTV 3 рассчитаны на один URL на источник в данной конфигурации. Сам комбинированный файл уже объединяет RU и UA.
+
+Действующая программа v22 является **статическим** XMLTV и устаревает. В сравнительном эксперименте использовать как контроль совместимости и не оценивать точность эфирного расписания без свежего файла.
 
 ## Порядок технических действий
 
