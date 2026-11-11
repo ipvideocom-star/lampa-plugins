@@ -79,7 +79,7 @@
       var epgIsManaged = safeSet('liptv_epg_url', XMLTV, []);
       if (epgIsManaged) {
         // Third-party Lampa IPTV has dedicated custom EPG setting.
-        safeSet('liptv_epg_source', 'custom', ['auto', 'playlist', 'preset']);
+        safeSet('liptv_epg_source', 'custom', []); // initialise only when unset; never reset the viewer's choice
       }
     }
     console.log('IPTV compare v1: scoped Samsung, MaxTV M3U set=' +
