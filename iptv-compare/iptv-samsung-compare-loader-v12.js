@@ -1,4 +1,4 @@
-/* Side-by-side Samsung IPTV plugins v1.2, 2026-11-10.
+/* Side-by-side Samsung IPTV plugins v1.2 + Tizen syntax repair, 2026-11-11.
    Autoload MaxTV + MIT-adapted Lampa IPTV on the two existing Samsung/MSX UIDs.
    Does NOT touch IPTV+ settings, current EPG, other devices, Caddy, or Lampac.
    Never embeds raw device UID, stream URLs, or authentication tokens.
@@ -14,7 +14,7 @@
   var XMLTV = 'https://lampa.v6.army/iptv/playlists/IPTV-Samsung-Guide-v22.xml';
   var MAX_TV = 'https://cdn.jsdelivr.net/gh/maks-mk/lampatv@15f9841b568fb1c6cca97aa1dcb3a615918d06c0/tv.js';
   var MAX_TV_FALLBACK = 'https://raw.githubusercontent.com/maks-mk/lampatv/15f9841b568fb1c6cca97aa1dcb3a615918d06c0/tv.js';
-  var LIPTV = 'https://cdn.jsdelivr.net/gh/ipvideocom-star/lampa-plugins@06bcdfe226968502bd20ce330dee513549c2a15e/iptv-compare/lampa-iptv-third-party-comparison-v1.js';
+  var LIPTV = 'https://cdn.jsdelivr.net/gh/ipvideocom-star/lampa-plugins@7e60212830d2618f5121801e427de9883e8ebd3e/iptv-compare/lampa-iptv-third-party-comparison-v2-tizen.js';
   var attempts = 0, started = false;
 
   function fp(value) {
