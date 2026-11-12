@@ -79,3 +79,11 @@
 - Исправленная версия: `iptv-compare/lampa-iptv-third-party-comparison-v4-tizen-scroll.js`. Её обработчик `hover:focus` прокручивает нужный контейнер через `scrollTop` / `getBoundingClientRect`, с запасом 12px и ограничением в высоту списка. Поддерживает также группы и режим сетки, без влияния на документ/другие плагины.
 - Обновлены существующие загрузчики `iptv-samsung-compare-loader-v12.js` и `-v13.js`: URL IPTV 3 теперь pinned к v4. Политика сервера, автонастройки IPTV+, MaxTV, M3U и XMLTV не изменялись.
 - В автономной проверке JS-синтаксиса и сценариях прокрутки (вверх/вниз, низ списка, отсутствие метода closest на старом Tizen) ошибок нет. **Фактический результат Samsung требует подтверждения**.
+
+## Samsung IPTV 3 v5 — ReferenceError after auto-scroll (12.11.2026)
+
+- При запуске IPTV 3 пользователь на Samsung получил полноэкранную ошибку `ReferenceError: scrollLiptvFocusedItem is not defined`, стек из `lampa-iptv-third-party-comparison-v4-tizen-scroll.js` в обработчике `hover:focus`.
+- Причина: обработчик `hover:focus` в `createMainScreen()` ссылался на функцию, объявленную внутри вложенного `init()`. Функция отсутствовала в лексической области обработчика.
+- Исправление: `iptv-compare/lampa-iptv-third-party-comparison-v5-tizen-scroll-scope.js`. Общая функция `scrollLiptvFocusedItem` перенесена на уровень внешнего замыкания, до `createMainScreen`, без ссылки на приватную переменную `_body`. Введён обход родителей без `Element.closest`, чтобы не зависеть от старого Tizen.
+- Проверено: синтаксис всего JS-файла; обработчик фокуса реального `createMainScreen` в мок-среде, прокрутка вверх и вниз, видимый элемент без прокрутки, fallback без `closest`. Все проверки PASS. **На Samsung ещё не подтверждено.**
+- Текущие файлы `iptv-samsung-compare-loader-v12.js` и `-v13.js` обновлены только в строке pinned JS `LIPTV`: на v5. M3U, XMLTV, IPTV+, MaxTV и политики на сервере не изменялись.
