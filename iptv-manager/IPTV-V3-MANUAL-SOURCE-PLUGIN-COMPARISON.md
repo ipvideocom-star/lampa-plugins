@@ -121,3 +121,13 @@ After HTTPS SHA and two-UID policy verification, it removes the previous three-s
 Full comparative HTML file generated in the chat from uploaded M3U sources; includes all channel names, groups, source hosts and EPG metadata without full stream URLs or credentials.
 
 All code/installer validation is static or simulated until user's next server run and Samsung test confirms. No server mutation was performed directly from this chat.
+
+## 13.11.2026 — fourth Samsung IPTV client: IPTV PRO Universal #19
+
+Fourth candidate: [Artrax90/lampa IPT V PRO Universal](https://github.com/Artrax90/lampa/blob/001a67d5e0fb73e22ecb1b317562d544617f97f9/iptv.js), exact upstream Git blob SHA1 `956aa4db4f6a9c3d07fa6512bd567012ce640456`.
+
+User approved testing it as independent **fourth** client on the same #19 M3U (3276 entries) for **two Samsung Lampa UIDs only**, alongside unchanged IPTV+, MaxTV and IPTV 3. The once-off Windows Server 2022 installer is delivered in chat as `IPTV-Samsung-4th-Player-IPTVPRO-19-v1.zip`; not committed to GitHub to avoid exposing selected opaque M3U URLs. The server downloads the immutable upstream source, validates its Git blob, and patches an *isolated* `iptv_universal_19` component/controller, unique storage `iptv_universal_v416_19` and left-menu entry `IPTV PRO - #19`. Built-in MEGA, RU IPTV Org and PRISMA preset sources are removed from this isolated copy and replaced with exactly the existing #19 URL. **Crucial:** original IPTV PRO parser does not parse `#EXTGRP`; source #19 uses it for 3274 channels. Installer patches `parsePlaylist` to recognize this tag and maintain original groups. Also patches plugin boot-time `window.appready` support for latest Lampa, preserving Tizen-compatible JS syntax. No copy of third-party source is committed here.
+
+Preflight checks preserve original #19 M3U SHA256 and count; published client JS/loader checked by HTTPS SHA; adds only `iptv_pro_universal_19_v1` to `C:\\ReservLampac\\PluginManager\\plugins.json` with a policy backup and runtime verification against the two Samsung UIDs. Loader FNV hash checks prevent execution for other devices. An independent rollback is included. Do not change Lampac, Caddy, production playlists, HLS Relay, EPG or schedules. EPG availability for #19 is not guaranteed because original M3U has no XMLTV/tvg-id.
+
+**Validation status:** source patch syntax and #EXTGRP parsing passed code checks; UID-scoped loader tested in Node for two allowed and three denied UID strings. Windows PowerShell runtime and actual Samsung navigation/playback **not yet confirmed**; require installer report `READY_FOR_SAMSUNG_FOUR_IPTV_CLIENTS`, then Samsung acceptance test.
