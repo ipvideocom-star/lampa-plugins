@@ -87,3 +87,21 @@
 - Исправление: `iptv-compare/lampa-iptv-third-party-comparison-v5-tizen-scroll-scope.js`. Общая функция `scrollLiptvFocusedItem` перенесена на уровень внешнего замыкания, до `createMainScreen`, без ссылки на приватную переменную `_body`. Введён обход родителей без `Element.closest`, чтобы не зависеть от старого Tizen.
 - Проверено: синтаксис всего JS-файла; обработчик фокуса реального `createMainScreen` в мок-среде, прокрутка вверх и вниз, видимый элемент без прокрутки, fallback без `closest`. Все проверки PASS. **На Samsung ещё не подтверждено.**
 - Текущие файлы `iptv-samsung-compare-loader-v12.js` и `-v13.js` обновлены только в строке pinned JS `LIPTV`: на v5. M3U, XMLTV, IPTV+, MaxTV и политики на сервере не изменялись.
+
+## Community three-source comparison — 13.11.2026
+
+User supplied three raw M3U files to compare on Samsung, **without filtering, re-sorting or probing streams**.
+
+| Archive original | M3U entries | Native categories | EPG header |
+|---|---:|---:|---|
+| community_content (19).m3u | 3276 | 16 through `#EXTGRP:` | none |
+| community_content (20).m3u | 3246 | 56 `group-title` categories | `http://epg.one/epg.xml.gz` |
+| community_content (21).m3u | 3246 | 56 `group-title` categories | `http://epg.one/epg.xml.gz` |
+
+File 20 and 21 have matching channel names/order, but 3244 stream paths use differing access-key-like segments. **Do not treat them as independent channel catalogs.** Private keys and raw M3U files are never committed to public GitHub.
+
+Samsung design: add **one** left-menu entry `IPTV — три плейлиста`; it opens a 3-option picker then a single source in IPTV 3. Do not concatenate 9768 entries into a gigantic TV DOM. Existing IPTV+/MaxTV and original 257-channel IPTV 3 remain untouched. Plugin `iptv-compare/lampa-iptv-third-party-comparison-v6-source-selector.js` accepts transient `compare_m3u`, `compare_epg` component constructor options (no persistent Storage mutation), supports `#EXTGRP` and unique UI keys for streams sharing tvg-id. Regular IPTV 3 v5 remote navigation/scroll remains supported. Generic selection component `iptv-compare/iptv-community-picker-v1.js` contains no stream tokens.
+
+Windows Server 2022 installer ZIP (distributed through the chat, not on GitHub) writes the original M3Us to *new unguessable filenames* under `C:\IPTV-Manager\public\playlists\` and writes one locally generated JS picker with exact URLs. Adds the scoped policy `iptv_community_three_sources_v1` to `C:\ReservLampac\PluginManager\plugins.json` after a backup; Policy Server must deliver to both Samsung UIDs. Other clients are skipped by the picker. Rollback removes only this new policy and files.
+
+Security limitation: unguessable static URLs are **not authentication**. Anyone who knows them can retrieve a playlist; source paths may contain revocable access tokens. No secrets in GitHub. Content includes adult-labelled groups (20/21); no filtering per current user request. Most stream URLs and both EPG headers are HTTP: TV HTTPS mixed-content or compressed XMLTV compatibility is not guaranteed. No server/TV integration has yet been confirmed for the new package.
