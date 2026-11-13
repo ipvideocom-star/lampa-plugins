@@ -1601,7 +1601,7 @@ SOFTWARE.
 
       // Register component once — create() and destroy() called by Lampa lifecycle
       class LiptvMain {
-        constructor(object) { this.activity = object; }
+        constructor(object) { this.activity = object; this.compareM3u = object && object.compare_m3u; this.compareEpg = object && object.compare_epg; }
         render() {
           if (!this.html) {
             this.html = $('<div class="liptv-container"></div>');
@@ -1611,8 +1611,7 @@ SOFTWARE.
             });
             // Compare session is transient; never rewrite the user's own IPTV 3
             // playlist/EPG settings, favorites, or prior 257-channel source.
-            loadAndRender(this.activity && this.activity.compare_m3u,
-                          this.activity && this.activity.compare_epg);
+            loadAndRender(this.compareM3u, this.compareEpg);
           }
           return this.html[0];
         }
