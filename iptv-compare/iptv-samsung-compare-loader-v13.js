@@ -14,7 +14,7 @@
   var XMLTV = 'https://lampa.v6.army/iptv/playlists/IPTV-Samsung-Guide-v22.xml';
   var MAX_TV = 'https://cdn.jsdelivr.net/gh/maks-mk/lampatv@15f9841b568fb1c6cca97aa1dcb3a615918d06c0/tv.js';
   var MAX_TV_FALLBACK = 'https://raw.githubusercontent.com/maks-mk/lampatv/15f9841b568fb1c6cca97aa1dcb3a615918d06c0/tv.js';
-  var LIPTV = 'https://cdn.jsdelivr.net/gh/ipvideocom-star/lampa-plugins@9a4e9812db44f063fbac5e0e9059d4f6f7aab79d/iptv-compare/lampa-iptv-third-party-comparison-v6-source-selector.js';
+  var LIPTV = 'https://cdn.jsdelivr.net/gh/ipvideocom-star/lampa-plugins@2d7e2c4e62b55c36d06e6d51aa11e0b332deaf76/iptv-compare/lampa-iptv-third-party-comparison-v6-source-selector.js';
   var attempts = 0, started = false;
 
   function fp(value) {
