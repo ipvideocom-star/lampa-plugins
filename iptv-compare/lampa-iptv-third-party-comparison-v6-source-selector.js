@@ -55,7 +55,14 @@ SOFTWARE.
       var line = lines[i].trim();
       if (!line) continue;
       if (line.indexOf('#EXTINF:') === 0) {
-        var comma = line.lastIndexOf(',');
+        // EXTINF names may contain commas. Split at the first comma that
+        // is outside a quoted metadata attribute, preserving full titles.
+        var comma = -1, quote = false;
+        for (var ci = 0; ci < line.length; ci++) {
+          var ch = line.charAt(ci);
+          if (ch === '"') quote = !quote;
+          else if (ch === ',' && !quote) { comma = ci; break; }
+        }
         if (comma < 0) { pending = null; continue; }
         var header = line.slice(0, comma);
         var name = line.slice(comma + 1).trim();
