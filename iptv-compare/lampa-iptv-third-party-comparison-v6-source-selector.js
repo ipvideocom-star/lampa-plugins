@@ -1627,6 +1627,7 @@ SOFTWARE.
         }
       }
       Lampa.Component.add('liptv_main', LiptvMain);
+      window.__iptvCompareApiV6 = true; // supported transient compare_m3u/compare_epg activity options
 
       // Track current playing channel immediately when playChannel() is called
       setOnPlay(function(channel) {
