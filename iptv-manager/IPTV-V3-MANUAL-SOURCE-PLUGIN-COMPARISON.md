@@ -141,3 +141,18 @@ Observed startup error: `Community-Picker-9db6aba44a524e43a5d67efbcff13c69.js` f
 Prepared Windows Server 2022 cleanup: `IPTV-KeepOnly-IPTVPRO19-Samsung-Cleanup-v1.zip` with `START-KeepOnly-IPTVPRO19.cmd` and rollback. It verifies the successful IPTV PRO #19 installation manifests and original source SHA256, republishes a harmless no-op JS at the exact old Community-Picker URL (without any stream tokens), reintroduces an *inactive policy tombstone* for the retired URL, adds two Samsung UIDs to `exclude_uids` of older IPTV plugin policy records while leaving other UID behavior untouched, then confirms runtime policy for both Samsung UIDs has only `iptv_pro_universal_19_v1` allowed and all retired URLs represented in `managed` for client-side removal. If the managed/unmanaged behavior is not as expected, **fails safely and rolls back the old policy**. It never deletes the old JS before client sync, and never changes Lampac, Caddy configuration, services, schedules, M3U or XMLTV.
 
 **Status:** ZIP produced with archive-integrity validation. PowerShell runtime and Samsung Lampa acceptance not yet performed. Require `READY_KEEP_ONLY_IPTV_PRO19_ON_SAMSUNG` in server report; then fully restart both Samsung Lampa variants. There may be a one-time stale menu until a second restart due to client cache.
+
+## 13.11.2026 — IPTV PRO #19 v2 Samsung menu/empty-list repair
+
+Samsung TV screenshots after the earlier cleanup show **three** separate `IPTV PRO - #19` entries in the side menu, while the player returns empty. IPTV+ still works and the user explicitly wishes to keep it as a comparator; do **not** remove/disable IPTV+.
+
+Root causes found in the exact IPTV PRO v1 server installer and upstream `Artrax90/lampa/iptv.js`:
+
+1. v1 replaced three upstream defaults with only **one** `Плейлист №19` but did not remove calls `ensureBuiltinPlaylist(raw.playlists, def.playlists[1])` and `[2]`. `ensureBuiltinPlaylist` accesses `builtin.url`, so `loadConfig()` raises a `TypeError` on `undefined` before channel rendering.
+2. Upstream `$('.menu .menu__list').append(item)` appends/clones the menu item into **every** matching Lampa menu list; Samsung has more than one list. Fix: target the first menu list and prune duplicate entries.
+3. `defaults().lastGroup = 'STAR_FAVORITES'` while favorites are empty. After load, activate the first nonempty actual #19 group instead of an empty Favorites pane.
+4. IPTV PRO Universal intentionally does **not** register a separate Lampa `SettingsApi` component; configuration is inside the IPTV PRO interface.
+
+One-click remediation produced as `IPTV-PRO19-Samsung-FIX-v2-OneClick.zip` with CMD installer, dated backup, exact previous JSON rollback, two-UID verification and new cache-busting JS filenames. It reads old server-deployed IPTV PRO variant and source #19 manifest, validates the original M3U SHA256 and 3276 entries, checks the safety patch anchors exactly once, writes a separate fixed IPTV PRO v2 JS and loader under new unique Caddy URLs, verifies both through HTTPS with SHA256. It **adds** `iptv_pro_universal_19_v2`, excludes the two Samsung UIDs from old `iptv_pro_universal_19_v1` (old URL stays `managed` for unregistration), and preserves all other policy records and installed IPTV+ behavior. Original streaming data, M3U/EPG and non-IPTV plugins remain unchanged. On success: `READY_IPTVPRO19_V2_MENU_AND_EMPTY_FIX`. Allow **two full Lampa restarts** for old registry cleanup. Keep v1 deployment backup for rollback.
+
+Validation: reconstructed full JS syntax and removed invalid builtin references checked in V8; ZIP archive integrity checked. **Windows Server runtime and Samsung behavior not yet validated.**
