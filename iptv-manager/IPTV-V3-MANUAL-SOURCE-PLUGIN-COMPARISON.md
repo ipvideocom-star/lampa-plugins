@@ -176,3 +176,15 @@ Only one new UID-guarded JS loader is published under the user's Caddy playlist 
 Preflight checks the previously repaired IPTV PRO v2 policy (`latest-iptvpro19-fix-v2.json`) and original IPTV+ policy are both delivered to each Samsung UID. All other `plugins.json` records are compared for semantic identity before update and left unchanged. HTTPS SHA256 verifies existing M3U, existing IPTV+ #19 JS and new loader. Full backup, conditional rollback and desktop report included. Expected server status: `READY_IPTVPLUS19_STANDALONE_SAMSUNG`.
 
 Validation: Archive integrity verified; menu loader parsed by Node/V8, mocked both accepted Samsung UIDs and a third rejected UID, verified one menu, lazy load, two opens, and preservation of original IPTV+ storage. **PowerShell Server runtime and Samsung UI acceptance are not yet confirmed.**
+
+## 13.11.2026 — FINAL PLAYER CHOICE: TWO IPTV+ ONLY
+
+User finished Samsung playback comparison and explicitly selected **IPTV+ only**. The target Samsung (official Lampa UID `ymdqqucx`; MSX UID `yd7yhpcg`) left menu must contain precisely:
+1. **IPTV+** — unchanged original 257-channel RU/UA pilot and legacy EPG as previously configured.
+2. **IPTV+ — №19** — independent existing `iptv_plus_19` client with original M3U #19 (3276 entries, 16 original categories) using its separate Storage namespace.
+
+**Remove IPTV PRO Universal #19 v1/v2 from both Samsung UIDs**. MaxTV, IPTV 3 and earlier three-source picker remain retired. Other plugins (Likhtar, Source Grid, etc.), other devices and old playlists/EPG files remain unchanged. Do not add more M3U or modify #19 until the user gives the next task.
+
+Prepared one-click Windows Server 2022 cleanup: `IPTV-Keep-Two-IPTVPlus-Samsung-v1.zip` / `START-KeepTwoIPTVPlus.cmd`. It validates successful manifests `latest-iptvplus19-standalone.json`, `latest-iptvpro19-fix-v2.json`, original #19 SHA256, both live Samsung policies. It changes **only** `exclude_uids` on `iptv_pro_universal_19_v1` and `iptv_pro_universal_19_v2` in `C:\\ReservLampac\\PluginManager\\plugins.json`. Original IPTV+ and standalone #19 policy entries remain byte-equivalent, and older PRO URLs remain `managed` for Lampa client-side de-registration. Backup, conditional rollback and post-change verification included. Status on success: `READY_TWO_IPTVPLUS_ONLY_SAMSUNG`.
+
+**Status:** package assembled and ZIP integrity checked; **not yet executed on user Windows Server**. After the one-click run, 1–2 complete Samsung Lampa restarts are needed. Actual Samsung UI acceptance not yet verified; if stale PRO menu remains after sync, diagnose remaining local Lampa registration without reinstalling IPTV+ or editing playlists.
