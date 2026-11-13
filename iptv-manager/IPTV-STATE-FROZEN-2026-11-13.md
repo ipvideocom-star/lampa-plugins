@@ -3,7 +3,7 @@
 **Decision:** IPTV work paused deliberately while Lampac Next Generation is updated to 1.90.0 and movie playback is tested.
 
 ## Target Samsung configuration (installed server-side, final TV acceptance pending)
-- Official Samsung Lampa UID `ymdqqucx` and Samsung MSX Lampa UID `yd7yhpcg`.
+- Both Samsung Lampa clients (official and MSX); the currently authorized UID values are intentionally not stored in this public document.
 - Exactly **three independent IPTV+ clients**, each with its own storage:
   1. **IPTV+** (`iptv_plus`) — original RU/UA pilot playlist, **257** entries (125 UA, 132 RU), previously configured EPG. Original separate files remain 125 UA and 133 RU (1-entry discrepancy is known, not repaired).
   2. **IPTV+ №19** (`iptv_plus_19`) — original user-selected M3U **3276** entries, `#EXTGRP` categories, no native XMLTV or regular tvg-id; keep original source unchanged.
