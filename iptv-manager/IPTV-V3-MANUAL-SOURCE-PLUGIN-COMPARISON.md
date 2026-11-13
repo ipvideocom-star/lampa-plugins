@@ -105,3 +105,19 @@ Samsung design: add **one** left-menu entry `IPTV — три плейлиста`
 Windows Server 2022 installer ZIP (distributed through the chat, not on GitHub) writes the original M3Us to *new unguessable filenames* under `C:\IPTV-Manager\public\playlists\` and writes one locally generated JS picker with exact URLs. Adds the scoped policy `iptv_community_three_sources_v1` to `C:\ReservLampac\PluginManager\plugins.json` after a backup; Policy Server must deliver to both Samsung UIDs. Other clients are skipped by the picker. Rollback removes only this new policy and files.
 
 Security limitation: unguessable static URLs are **not authentication**. Anyone who knows them can retrieve a playlist; source paths may contain revocable access tokens. No secrets in GitHub. Content includes adult-labelled groups (20/21); no filtering per current user request. Most stream URLs and both EPG headers are HTTP: TV HTTPS mixed-content or compressed XMLTV compatibility is not guaranteed. No server/TV integration has yet been confirmed for the new package.
+
+## 13.11.2026 — Source #19 retained across three independent clients
+
+User-tested playback favors M3U #19, which has **3276** `#EXTINF` entries (3274 ordinary streams + 2 informational entries). #20/#21 have 3246 entries each and identical ordered channels and tvg-ids; 3244 media URLs differ in their access-key-like path segments. #19 and #20 share exactly **2615 normalized case-insensitive names**; 661 titles occur only in #19, 631 only in #20. These counts compare M3U metadata, **not** programme identity, rights, uptime or real availability.
+
+Upstream distribution concentration: #19 sends 3274 stream URLs to `7b4ecc7c.edmonst.net`. #20/21 send 3244 to `sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw`. The two common information links use `v.mover.uz`. Actual underlying broadcasters may be different; no assumptions about provider ownership.
+
+EPG: #19 does not declare XMLTV and all its 3274 ordinary entries lack tvg-id. #20/21 declare `http://epg.one/epg.xml.gz`; 3242 numeric tvg-id, 2 ordinary entries missing ids, 2 informational entries `no_epg`. Actual XMLTV coverage not verified.
+
+New upgrade ZIP `IPTV-Community19-ThreePlayers-KEEP-19-v1.zip` reuses the original unmodified, previously published #19 M3U on the user's Windows Server 2022. Installer requires existing `C:\ReservLampac\IPTVPlus\CommunityCompare\latest-install.json`. Stages isolated IPTV+ #19 / MaxTV #19 client variants locally from pinned GitHub revisions, plus one UID-scoped menu loader. Old 257-channel IPTV+/MaxTV/IPTV3 and EPG settings must remain unmodified. IPTV3 uses transient `compare_m3u` Activity override.
+
+After HTTPS SHA and two-UID policy verification, it removes the previous three-source selector policy and moves *public* #20/#21 M3Us and picker JS into a private backup under `CommunityCompare\Selected19-*\Retired-Sources-20-21` (never permanently deletes). Full rollback is supplied. No original M3U, media access token or secret URL is stored in GitHub; published playlist URLs are unguessable but are **not authenticated**. Source #19 EPG will vary by plugin; no external EPG is silently assigned.
+
+Full comparative HTML file generated in the chat from uploaded M3U sources; includes all channel names, groups, source hosts and EPG metadata without full stream URLs or credentials.
+
+All code/installer validation is static or simulated until user's next server run and Samsung test confirms. No server mutation was performed directly from this chat.
