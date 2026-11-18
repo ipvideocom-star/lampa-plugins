@@ -1,3 +1,16 @@
+# ACTUAL USER-SERVER INSTALL RESULT — 18 NOVEMBER 2026 14:55 KYIV
+
+**v1.2 UA Managed Cutover: SUCCESS per PowerShell installation log.** First primary `iptv_plus` policy entry globally replaced by `IPTV Украина`; primary UID exclusion list empty. Policy API synthetic UID tests `UA_GLOBAL_VERIFY_01` and `UA_GLOBAL_VERIFY_02` passed. All unrelated policies and separate IPTV #19 and #14 preserved. No RU playlists altered; no new Scheduled Tasks; AutoPublish OFF.
+
+New first-playlist endpoints:
+- `https://lampa.v6.army/iptv/playlists/IPTV-UA-NEW.m3u` — private-source-derived 158 channel, 9-category UA snapshot (video-packet observed earlier; Samsung verification pending).
+- `https://lampa.v6.army/iptv/playlists/IPTV-UA-EPG-NEW.xml` — newly generated reviewed EPG from EPGShare and OpenEPG with 53/158 channels having current program, 4,528 current/future entries, historical-only channels 0. All 53 have 'LiveNow=True' at time of generation; 105 lack mappings.
+- Existing task `IPTV-Manager-EPG-UA-6h` was extended with guarded EPG updater; next actual scheduled refresh still needs log confirmation.
+- Successful backup directory: `C:\ReservLampac\IPTV-Manager\UA-Managed\cutover-20261118-145546-1de765ce`.
+
+**Strict status:** This is a server-side deployment success, not yet acceptance on Samsung/Android. Direct public URL fetch was unavailable to ChatGPT, so no independent external HTTPS validation; installer-reported results are the current evidence. NIGHTLY TVA feed refresh and automatic playlist channel promotion are separate; playlist AutoPublish remains OFF. Do not claim daily M3U rebuild or full EPG coverage. Setanta Sports candidate verification still pending. Before any future upgrade preserve IPTV #19/#14, and do not start RU work without user-supplied sources.
+
+---
 # 2026-11-18 CUTOVER FAILURE AND CORRECTIVE PACKAGE v1.2
 
 **Actual v1.1 execution:** offline selftest PASS, preflight PASS (158 UA channels, 9 groups, primary `iptv_plus`, global exclusion list empty), EPGShare and OpenEPG downloads OK, then install aborted. Exact message: "Only the private UA Verified preview folder is accepted as M3U input." Installer printed rollback success but the post-rollback server state has not been independently verified.
