@@ -1,3 +1,20 @@
+# ACTIVE RELEASE INSTRUCTION — 18 NOV 2026
+
+**Target Samsung side menu: THREE entries, not one or two.**
+1. **IPTV Украина** — replaces ONLY the original/first IPTV+ (`iptv_plus`) and loads a NEW managed UA-only M3U with categories and a separate UA-only XMLTV.
+2. **IPTV №19** — existing 3,276-entry user playlist remains fully unchanged.
+3. **IPTV №14** — existing 2,710-entry user playlist remains fully unchanged.
+
+No RU build, no RU playlist selection, no removal of #19/#14. Prior plans below are superseded where they conflict. Names are tentative. User has explicitly authorized the UA-first replacement, with rollback and existing Plugin Policy Server.
+
+**Prepared public plugin:** `iptv-plus/iptv-ua-managed-v1.3.1.js` with primary plugin ID `iptv_plus`, one sidebar menu entry `IPTV Украина`, fixed `/iptv/playlists/IPTV-UA-NEW.m3u` + `IPTV-UA-EPG-NEW.xml` and automatic M3U reload while open. User #19/#14 instances do not share this plugin ID.
+
+**Prepared server cutover package:** `UA-Managed-Cutover-v1.zip` is a user-executed bundle: PowerShell syntax selftest, preflight policy/layout inspection, backup to `C:\ReservLampac\IPTV-Manager\UA-Managed`, new distinct UA M3U (158 previously ffprobe-verified candidates, nine categories), new current/future EPG, HTTPS checksum checks, guarded extension to existing EPG UA 6h script, and finally selective `iptv_plus` plugin URL/name policy update. Rollback supported. This bundle has not been run on the user's Windows server; production remains unchanged pending execution.
+
+**Honest limitations:** 158 video-packet observations do not prove identity or continuous availability. Reviewed historical snapshot has 39 EPGShare identity-reviewed plus 12 OpenEPG matches = 51/158, not the 67 suspect shadow entries. Regeneration fetches fresh sources and applies quality guards; actual count will change. TVA provider fetches source M3Us nightly and retains last good, but a safe pipeline for automatically promoting revised stream URLs into the NEW UA M3U has not been completed yet. Setanta Sports 1 and 2 appear in TVA source lists but have no verified video/content identity or licensing confirmation and are NOT included automatically. User's goal of daily source selection, refresh and reliable backups remains on the implementation roadmap — do not claim completed.
+
+---
+
 # CURRENT PHASE OVERRIDE — 2026-11-18 (USER INSTRUCTION)
 
 **ONLY UA NOW. RU WORK IS ON HOLD.**
