@@ -1,3 +1,11 @@
+# 18 NOV — CHROME LEGACY-REGISTRY CONFLICT AND FIX
+
+User Chrome Lampa showed **17 registered and 17 loaded IPTV-related scripts**, including both `iptv-plus-v1.2.0-settings-fix.js` / `iptv-plus-v1.2.1-auto-refresh.js`, many legacy autosetup scripts pointing to `IPTV-UA-RU-Relay-v02-257.m3u`, both independent IPTV #19/#14, and the new `iptv-ua-managed-v1.3.1.js` loaded last. The old script initializes global `window.lampa_iptv_plus_ready` first, so the new IPTV Украина plugin is skipped by its duplicate guard.
+
+**Fix deployed to existing public GitHub Pages plugin** `iptv-plus/iptv-ua-managed-v1.3.1.js` on 18 Nov (commit `e5ef86876c06735852ff2d115353cb9572597718`). A safe, idempotent migration executes BEFORE that guard and removes ONLY 10 exact obsolete `iptv-plus/` filenames and the retired `iptv-compare/iptv-samsung-compare-loader-v12.js` from each client's `Lampa.Plugins` registry. It backs up entries in local Lampa Storage key `iptv_ua_legacy_plugins_backup_20261118`. It never removes independent #19/#14 URLs, Community19 loaders, plugin-manager-test-v2.js or unrelated plugins; does not touch UID policy or IPTV M3U/EPG. Verified with JS syntax check and mocked Lampa.Plugins get/remove tests. Since old scripts already executed on the current page, **restart Lampa, allow new source to load and migrate local registry, then restart again** for new primary code to win. On Chrome use hard refresh to bypass cache when appropriate. Server policy may still re-register legacy entries; if regression occurs, inspect policy/extra auto-registration source before more modifications. No user device acceptance yet.
+
+---
+
 # ACTUAL USER-SERVER INSTALL RESULT — 18 NOVEMBER 2026 14:55 KYIV
 
 **v1.2 UA Managed Cutover: SUCCESS per PowerShell installation log.** First primary `iptv_plus` policy entry globally replaced by `IPTV Украина`; primary UID exclusion list empty. Policy API synthetic UID tests `UA_GLOBAL_VERIFY_01` and `UA_GLOBAL_VERIFY_02` passed. All unrelated policies and separate IPTV #19 and #14 preserved. No RU playlists altered; no new Scheduled Tasks; AutoPublish OFF.
