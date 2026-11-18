@@ -1,3 +1,19 @@
+# UA SAMSUNG ACCEPTANCE UPDATE AND CATEGORY RULES — 2026-11-18
+
+**Samsung acceptance evidence:** user personally tested about 20 Ukrainian streams in Samsung Lampa and found all played, including many sport channels that fail in Chrome. The previous statement that 158-UA was a failed playback release **is no longer valid globally**; Samsung is the primary acceptance client, Chrome is an auxiliary client whose HLS/CORS/network behavior differs. This test DOES NOT demonstrate all 158 play continuously or that Chrome has been fixed. Keep Chrome `manifestLoadError` as a separate browser-compatibility backlog; do not remove working Samsung channels merely because of Chrome-only failures.
+
+**Category corrections implemented in existing global plugin**, `iptv-plus/iptv-ua-managed-v1.3.1.js` (GitHub commit `3d686566b6575f250832bda884fd6192a6369b15`) using `correctUaChannelGroups()` immediately after M3U parse, prior to grouping. It resolves the EXISTING nine source groups by matching the actual available group labels; applies exact canonical EPG channel IDs plus conservative whole-name matches:
+- Main broadcast: 1+1, 2+2, ICTV, ICTV2, Inter, STB, Novyi Channel, TET, Pershyi to existing `Загальні` group.
+- Knowledge/lifestyle: Dacha, Rybalka, Trofei, Nauka, Terra, Fauna, KusKus plus unambiguous hunting/fishing names to existing `Пізнавальні` group.
+- Nonmatching channels retain their source `group-title`; 1+1 Марафон remains News; sports remain sports.
+- No new categories, stream changes, tvg-id changes, source URL changes, EPG edits, M3U publication, Policy Server edits or Windows task edits. Synthetic tests: 12 channels, 8 expected group changes, idempotent rerun 0, all non-group fields unchanged. Actual full 158-channel classification diff not yet tested because model has no on-server M3U access.
+
+**Source-of-truth follow-up:** UI rule is immediately available in the JS plugin source, but old UA AutoCatalog `Group-UA()` on the Windows server still needs durable category correction when its source script is available for editing. Avoid blind changes to a server-only file; source categories need one canonical mapper or shared rule table in IPTV Manager and a report of all 158 categories without stream URLs. Do not infer source categories from a handful of names. New TVA channels should pass this categorization gate on ingestion.
+
+**Other unchanged scope:** global to all valid UIDs; IPTV #19 and #14 untouched, RU on hold. 53/158 current EPG coverage remains a separate improvement project; nightly provider feed update is not automatic stream publication. Chrome HLS errors are plausible browser CORS/mixed-content/network/player differences; need isolate from Samsung native/media playback before altering streams.
+
+---
+
 # CRITICAL UA RELEASE QA FAILURE — 2026-11-18, user Chrome playback test
 
 **User evidence:** the globally delivered IPTV Украина now exposes 158 channels in Chrome; only 1+1 observed working by user, many other channels fail with HLS `manifestLoadError fatal true`. Treat this release as **FAILED playback acceptance** even though plugin/EPG deployment succeeded. Do not advertise 158 "working" or schedule auto-promotion.
