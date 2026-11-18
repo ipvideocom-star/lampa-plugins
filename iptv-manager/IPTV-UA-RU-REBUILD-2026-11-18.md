@@ -1,3 +1,15 @@
+# 18 NOV 2026 — CATEGORY RELEASE SUCCESS / ANDROID ACCEPTANCE / CHROME MIXED CONTENT CAUSE
+
+**User confirmed successful v1.1 guarded rollout:** `ATOMIC REPLACE SELFTEST PASS` twice, category-only diff 158 entries / 43 groups, `UA EPG GUARD PASS`, `UA CATEGORY RELEASE PASS`, `EPG GUARD: PASS; HTTPS SHA256: PASS`. Backup `C:\ReservLampac\IPTV-Manager\UA-Managed\ua-categories-20261118-201326-29ff5df6`. Stream URLs, TVG IDs, EPG and UID policy unchanged; #19/#14 and RU untouched. Do not re-run release.
+
+**Android TV user acceptance:** separately tested Lampa IPTV Ukraine on Android box and observed it working normally. Samsung previously user tested ~20 channels, all played. These are the primary clients.
+
+**Chrome-specific root cause confirmed by user's DevTools:** Chrome Network request for `index.m3u8` had status **`Blocked: Mixed Content`** (HTTPS Lampa page attempted HTTP HLS fetch). This is a browser security block, not a channel outage; earlier `manifestLoadError` was therefore a misleading stream-health symptom. Immediate optional diagnostic workaround: ONLY in Chrome Site Settings for the **actual Lampa origin**, change Insecure content to Allow; refresh, verify playback. Does not secure the HTTP stream, and should not be used as broad browser flag / permanently as security policy. If this resolves the issue, production-grade follow-up is a carefully scoped server-side HTTPS HLS relay for upstream HTTP streams, including manifest URL/variant/segment rewriting, CORS, Referer, content-type, byte-range, redirect and security protections (non-open proxy, exact source allowlist, token secrecy). All TV/native stream URLs remain direct; no changes to M3U until separately tested and approved. Mixed content persists if HLS.js fetches nested HTTP manifests or segments; changing top-level index URL alone is insufficient.
+
+**Still next:** verify six-hour EPG refresh job after category guard migration, 53/158 EPG coverage needs improvements, nightly TVA pilot/backup flows, overall watchdog with auto-publish OFF.
+
+---
+
 # INCIDENT — 2026-11-18 19:55 — guarded UA category release v1 failed / FIX v1.1
 
 User ran `Publish-UA-Categories-Guarded-v1.ps1 -Apply`. Both `CATEGORY-ONLY DIFF PASS` (158 channels, 43 group changes, other lines unchanged) and `UA EPG GUARD PASS` were printed. Production replace failed: `[IO.File]::Replace($tmp1,$updater,$null)` (and three analogous paths) threw `The path is empty. (Parameter 'path')` on Windows Server 2022 PowerShell 7. Installer reported `UA CATEGORY RELEASE ABORTED / rollback attempted`, backup `C:\ReservLampac\IPTV-Manager\UA-Managed\ua-categories-20261118-195551-9441db19`. Exact post-rollback server SHA hashes have NOT been separately confirmed; do NOT declare published categories. Release was aborted before any success line.
