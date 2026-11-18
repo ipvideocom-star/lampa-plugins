@@ -1,6 +1,46 @@
 (function () {
     'use strict';
 
+    // Global one-time migration: remove ONLY 10 obsolete IPTV+ tests
+    // previously persisted in each client's Lampa.Plugins registry.
+    // Never delete IPTV #19, #14, Community19 loaders or unrelated plugins.
+    // Must execute before the duplicate instance guard below.
+    function migrateOldIptvPluginUrls() {
+        if (!window.Lampa || !Lampa.Plugins ||
+            typeof Lampa.Plugins.get !== 'function' ||
+            typeof Lampa.Plugins.remove !== 'function' ||
+            !Lampa.Storage || typeof Lampa.Storage.get !== 'function' ||
+            typeof Lampa.Storage.set !== 'function') return;
+        var oldNames = ["iptv-plus-v1.2.0-settings-fix.js","iptv-plus-v1.2.1-auto-refresh.js","iptv-plus-autosetup-chrome-test-v1.js","iptv-plus-autosetup-chrome-epg-test-v2.js","iptv-plus-autosetup-chrome-openepg-test-v4.js","iptv-plus-autosetup-chrome-merged-epg-test-v5.js","iptv-plus-autosetup-ua-ru-chrome-samsung-v8.js","iptv-plus-autosetup-ua-ru-chrome-samsung-relay-pilot-v9.js","iptv-plus-autosetup-ua-ru-chrome-samsung-relay-pilot-v10.js","iptv-plus-autosetup-samsung-msx-epg-v11.js"];
+        var safePrefix = 'https://ipvideocom-star.github.io/lampa-plugins/iptv-plus/';
+        try {
+            var registered = Lampa.Plugins.get();
+            if (!Array.isArray(registered)) return;
+            var old = registered.filter(function (entry) {
+                var url = typeof entry === 'string' ? entry : entry && entry.url;
+                if (typeof url !== 'string' || url.indexOf(safePrefix) !== 0) return false;
+                var suffix = url.split(/[?#]/)[0].slice(safePrefix.length);
+                return suffix.indexOf('/') < 0 && oldNames.indexOf(suffix) >= 0;
+            });
+            if (!old.length) return;
+            var backupKey = 'iptv_ua_legacy_plugins_backup_20261118';
+            if (!Lampa.Storage.get(backupKey, null)) {
+                Lampa.Storage.set(backupKey, old);
+            }
+            old.forEach(function (entry) { Lampa.Plugins.remove(entry); });
+            var remain = Lampa.Plugins.get().filter(function (entry) {
+                return old.indexOf(entry) >= 0;
+            });
+            console.log('[IPTV Украина] obsolete plugin migration:',
+                'removed=' + (old.length - remain.length),
+                'remaining=' + remain.length,
+                'restart Lampa to activate the Ukrainian plugin');
+        } catch (err) {
+            console.warn('[IPTV Украина] obsolete plugin migration failed', err);
+        }
+    }
+    migrateOldIptvPluginUrls();
+
     if (window.lampa_iptv_plus_ready) {
         if (typeof window.lampa_iptv_plus_restore_menu === 'function') {
             window.lampa_iptv_plus_restore_menu();
