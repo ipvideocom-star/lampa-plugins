@@ -1,3 +1,19 @@
+# CURRENT PHASE OVERRIDE — 2026-11-18 (USER INSTRUCTION)
+
+**ONLY UA NOW. RU WORK IS ON HOLD.**
+
+This overrides the older "build both independent M3U files now" plan below.
+
+1. Replace the current/legacy Samsung Lampa **IPTV+** menu experience with the new, independent Ukrainian collection maintained by UA AutoCatalog/TVA/EPG. User-facing menu label is provisional **IPTV Украина**; final label pending user approval.
+2. Remove old/duplicated IPTV menu entries from active distribution during the controlled UA cutover, with backup and rollback. **Do not delete source playlist files**, notably #14 and #19, since the user may choose either as the basis for RU later.
+3. **Do not assemble, test, stage, publish, modify or choose the new RU playlist at this time.** Future RU will use specific sources/files supplied by the user; no inferred feed (such as iptv-org), no copying old RU pilot, no autonomous selection of #14 vs #19.
+4. The preview two-entry plugin developed earlier is **NOT approved for deployment as-is**. For the interim UA-only release, ensure exactly one IPTV menu entry, with the new UA playlist. The second RU entry must be absent until explicitly requested.
+5. `IPTV-Dual-Fresh-Stage-v1.zip` and its RU staging procedure are **withdrawn**; do not run/install them.
+6. Keep production untouched until Ukrainian playlist, reviewed UA EPG, and plugin policy migration have passed checks and user approves the actual cutover. Nightly TVA provider and the existing source maintenance are retained.
+
+---
+# Earlier planning history (superseded where conflicting)
+
 # 2026-11-18 — NEW IPTV build for Lampa: exactly two M3U files, one IPTV+ instance
 
 **This decision supersedes** `IPTV-STATE-FROZEN-2026-11-13.md` and `TVA-MAIN-IPTVPLUS-INTEGRATION-2026-11-17.md` for future migration work. Older files document historical installations only.
