@@ -1,3 +1,9 @@
+# SUPERSEDED 2026-11-18
+
+**Do not use this former rollout plan.** The user replaced it with a clean-room build of two entirely new UA and RU M3U files and a single IPTV+ instance. Current source of truth: [IPTV-UA-RU-REBUILD-2026-11-18.md](IPTV-UA-RU-REBUILD-2026-11-18.md). Historical status below is retained for traceability.
+
+---
+
 # TVA → UA AutoCatalog → main IPTV+ | integration status (2026-11-17)
 
 ## Goal
