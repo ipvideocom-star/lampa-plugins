@@ -1,3 +1,15 @@
+# 18 NOV 2026 18:17 — UA CATEGORY v1.1 STAGING COMPLETE / NEXT RELEASE GATE
+
+**User Windows PowerShell results:** `Invoke-UA-Manager-Review-v1.1.ps1 -StageCategories -AdditionalEpgAudit` SELFTEST PASS; original M3U SHA256 `EE71310DDE9C890EF8854A035473C197340D5610047732D963D284B10802867E`; 158 channels, 0 duplicate IDs, 131 rule matches, **43 category-only group moves privately staged** at `C:\IPTV-Manager\data\ua-autocatalog\v3\manager-review\review-20261118-181702-a260cf5b\IPTV-UA-CATEGORIES-STAGED.m3u` with manifest `UA-CATEGORY-STAGE-REPORT.json`. UA EPG remains 53/158, missing 105; TVA snapshot 13.7 hours old. No public M3U/EPG/Policy/RU changed.
+
+**Important release blocker discovered and addressed in prepared guarded release script:** existing `C:\IPTV-Manager\Tools\UA-Managed\Update-UA-Managed-EPG-v1.ps1` `Assert-OnlyEPGHeaderDiff` compares the original verified-source M3U and public M3U line-by-line beyond EXTM3U header. Publishing only changed group-title/EXTGRP would otherwise break EVERY six-hour EPG update. The stage-only candidate MUST NOT be published in isolation. A versioned guarded release helper `Publish-UA-Categories-Guarded-v1.ps1` is prepared for local operator execution; it verifies old public SHA, stage report/candidate SHA, exactly 43 `group-title` moves, all other lines unchanged, patches only the EPG updater's source-comparison guard to tolerate group metadata while refusing every change to IDs, streams, labels and other metadata, parses the patched updater, function-tests it against candidate, backs up both files under `C:\ReservLampac\IPTV-Manager\UA-Managed\ua-categories-*`, replaces both atomically, HTTPS SHA verifies M3U, and rolls back on failure. No user-server application confirmed; no scheduled tasks created. Do NOT claim the category release completed until successful operator log.
+
+**EPG optional-source problem:** `https://iptv-org.github.io/epg/guides/ua/tvgid.ua.epg.xml` returns HTTP 404. Reviewer now correctly states `AdditionalEpgAuditStatus=UNAVAILABLE`, meaning 0 additional matches is NOT evidence of exhaustion. Replace with a tested live candidate (FreeEPG / XMLTV service etc.) in a future read-only audit; keep exact-ID and identity gates, no auto merge. Existing EPGShare/OpenEPG remain unchanged.
+
+**Main acceptance:** Samsung Lampa user tested approximately 20 UA streams, all worked despite Chrome errors; do not demote Samsung-working streams due to Chrome-only HLS. Independent IPTV #19, #14 and RU untouched; playlist AutoPublish OFF.
+
+---
+
 # UA MANAGER AUDIT — ACTUAL 2026-11-18 RESULTS, AND V1.1 STAGING
 
 **User server report** `review-20261118-180142-b46a9914`, read-only:
