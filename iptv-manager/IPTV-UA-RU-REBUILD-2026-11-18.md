@@ -1,3 +1,13 @@
+# INCIDENT — 2026-11-18 19:55 — guarded UA category release v1 failed / FIX v1.1
+
+User ran `Publish-UA-Categories-Guarded-v1.ps1 -Apply`. Both `CATEGORY-ONLY DIFF PASS` (158 channels, 43 group changes, other lines unchanged) and `UA EPG GUARD PASS` were printed. Production replace failed: `[IO.File]::Replace($tmp1,$updater,$null)` (and three analogous paths) threw `The path is empty. (Parameter 'path')` on Windows Server 2022 PowerShell 7. Installer reported `UA CATEGORY RELEASE ABORTED / rollback attempted`, backup `C:\ReservLampac\IPTV-Manager\UA-Managed\ua-categories-20261118-195551-9441db19`. Exact post-rollback server SHA hashes have NOT been separately confirmed; do NOT declare published categories. Release was aborted before any success line.
+
+**Corrective user-installable script produced:** `Publish-UA-Categories-Guarded-v1.1-FIX.ps1`, exact SHA256 `D1CAE5BEBA7FCE276A94D96EAA235C1E997EF67283956AF8D0F357DD56FC3106`. Four null-backup File.Replace invocations replaced with validated `Invoke-AtomicReplace(source,destination,nonempty-same-volume-backup)`; `-SelfTest` exercises .NET replacement, source backup, and rollback in isolated temp directory; `-Apply` automatically runs selftest after preflight before touching production. On errors, restores both files on disk based on SHA256 not just in-memory flags; reports verified rollback or incomplete. Retains 158/43 guard, current SHA checks, existing UA EPG guard patch, HTTPS SHA verification, backups under `C:\ReservLampac`. Static checks PASS, **production runtime not yet validated** (pwsh unavailable in build environment). User should download and run the new script ONLY after SHA check and successful selftest; never retry v1. Stage snapshot unchanged; if current M3U hash differs, v1.1 refuses.
+
+Scope unchanged: groups-only, no stream/UID/EPG/RU/#19/#14 changes. 105 UA channels still without confirmed XMLTV EPG. Optional EPG source HTTP404 and not applicable to this fix.
+
+---
+
 # 18 NOV 2026 18:17 — UA CATEGORY v1.1 STAGING COMPLETE / NEXT RELEASE GATE
 
 **User Windows PowerShell results:** `Invoke-UA-Manager-Review-v1.1.ps1 -StageCategories -AdditionalEpgAudit` SELFTEST PASS; original M3U SHA256 `EE71310DDE9C890EF8854A035473C197340D5610047732D963D284B10802867E`; 158 channels, 0 duplicate IDs, 131 rule matches, **43 category-only group moves privately staged** at `C:\IPTV-Manager\data\ua-autocatalog\v3\manager-review\review-20261118-181702-a260cf5b\IPTV-UA-CATEGORIES-STAGED.m3u` with manifest `UA-CATEGORY-STAGE-REPORT.json`. UA EPG remains 53/158, missing 105; TVA snapshot 13.7 hours old. No public M3U/EPG/Policy/RU changed.
