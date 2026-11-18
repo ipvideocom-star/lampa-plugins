@@ -18,7 +18,12 @@
             if (!Array.isArray(registered)) return;
             var old = registered.filter(function (entry) {
                 var url = typeof entry === 'string' ? entry : entry && entry.url;
-                if (typeof url !== 'string' || url.indexOf(safePrefix) !== 0) return false;
+                if (typeof url !== 'string') return false;
+                // Retired Samsung comparison loader injected MaxTV/3rd-party
+                // experiments; it is unrelated to independent #19 and #14.
+                if (url.split(/[?#]/)[0] ===
+                    'https://ipvideocom-star.github.io/lampa-plugins/iptv-compare/iptv-samsung-compare-loader-v12.js') return true;
+                if (url.indexOf(safePrefix) !== 0) return false;
                 var suffix = url.split(/[?#]/)[0].slice(safePrefix.length);
                 return suffix.indexOf('/') < 0 && oldNames.indexOf(suffix) >= 0;
             });
