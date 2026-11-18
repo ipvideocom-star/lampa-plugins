@@ -1,3 +1,15 @@
+# UPDATE — UA AVAILABLE TO ALL UIDs (2026-11-18)
+
+The user has now explicitly approved **global Plugin Policy Server delivery** of the new primary **IPTV Украина** plugin to ALL valid Lampa UIDs across Samsung, Android TV, and other clients. This replaces the former Samsung-only scope for the first managed IPTV plugin. The legacy IPTV #19 and IPTV #14 plugin entries and all other plugins (including their own `exclude_uids`) remain unchanged.
+
+**Server package v1.1:** `UA-Managed-Cutover-v1.1-ALL-UIDs.zip` supersedes v1. After successful guarded UA M3U+EPG publication, change only `plugins.iptv_plus` in `C:\ReservLampac\PluginManager\plugins.json` to `enabled=true`, `name=IPTV Украина`, `url=https://ipvideocom-star.github.io/lampa-plugins/iptv-plus/iptv-ua-managed-v1.3.1.js`, and **`exclude_uids=[]`**. Check the live Policy Server endpoint `127.0.0.1:9131/plugin-manager/policy?uid=...` with two non-user synthetic UIDs and roll back on failure. Keep backups and original scheduled tasks; restart Lampa clients to refresh plugin loading.
+
+Note: per-UID policy exclusion hides plugin distribution but does NOT cryptographically revoke access to already-known publicly served M3U URLs. To revoke actual streams, implement server-side authentication/authorization on the Caddy route separately. Do not infer that a client is denied from a missing sidebar item alone.
+
+No server cutover has been executed by ChatGPT. Source package is prepared; run and observe the installer on Windows Server before claiming deployment or functionality. UA source nightly refresh, automatic promotion to M3U, and Samsung playback acceptance are distinct gates. RU is still ON HOLD.
+
+---
+
 # ACTIVE RELEASE INSTRUCTION — 18 NOV 2026
 
 **Target Samsung side menu: THREE entries, not one or two.**
