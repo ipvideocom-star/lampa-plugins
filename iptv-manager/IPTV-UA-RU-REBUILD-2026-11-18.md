@@ -1,3 +1,15 @@
+# CRITICAL UA RELEASE QA FAILURE — 2026-11-18, user Chrome playback test
+
+**User evidence:** the globally delivered IPTV Украина now exposes 158 channels in Chrome; only 1+1 observed working by user, many other channels fail with HLS `manifestLoadError fatal true`. Treat this release as **FAILED playback acceptance** even though plugin/EPG deployment succeeded. Do not advertise 158 "working" or schedule auto-promotion.
+
+Sports read-only audit: 12/12 HTTP200/206, 7 with m3u8 signature but no tested child manifests or segments, 5 without valid HLS signature (Maincast Sport, Sport1, Sport2, Sport3, Suspilne Sport), one XSport missing browser-Origin CORS; importantly **ffprobe was NOT FOUND** and 0/12 had video tested in the current audit. Further check for mixed-content HTTP stream URLs under HTTPS Lampa, browser-origin mismatch, CORS on variant/segments, signed expired URLs, geo restrictions, media decoder compatibility, alternate URLs and content identity across **all 158**, not just sports. HTTP200 and CORS header on one response are not playback proof.
+
+**Confirmed categorization defect from `Invoke-UA-AutoCatalog-v3.ps1`:** `Group-UA()` uses a name+original-group regex and defaults unmatched to `Загальні`, with no words for `Дача`, fishing or hunting. `Дача` belongs in `Пізнавальні`; hunting/fishing likewise under `Пізнавальні` per user's preference. Need explicit category overrides, tests and a review of all 158 before next publication. The verified-preview builder COPYied `$ch.Category` from AutoCatalog unchanged. Do not patch only public M3U: correct source category rules then stage/release cleanly.
+
+**Change policy:** existing public URL, EPG, other plugin settings (#19, #14) and RU remain unchanged until all-stream compatibility gate and reviewed category diff pass; user permits removal of obsolete trial IPTV+ registrations, but keep requested #19/#14. Playlist AutoPublish remains OFF. Develop an integrated durable manager check/watchdog rather than more standalone scripts. Improve verified-channel QA to include browser-valid HTTPS, master and segment fetch, actual media packet decode and repeat probes; quarantine the others.
+
+---
+
 # UA SPORTS PLAYBACK INCIDENT — 2026-11-18
 
 **Observed on Chrome Lampa by user:** the new global `IPTV Украина` menu now loads a 158-entry playlist; `1+1` plays, but multiple sport channels fail: Dynamo Kyiv TV, DV Sport (user-reported name), Sport 3 and Maincast Sport; browser HLS player reports `manifestLoadError` and `fatal: true`. No Samsung testing requested.
