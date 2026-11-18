@@ -1,3 +1,17 @@
+# UA SPORTS PLAYBACK INCIDENT — 2026-11-18
+
+**Observed on Chrome Lampa by user:** the new global `IPTV Украина` menu now loads a 158-entry playlist; `1+1` plays, but multiple sport channels fail: Dynamo Kyiv TV, DV Sport (user-reported name), Sport 3 and Maincast Sport; browser HLS player reports `manifestLoadError` and `fatal: true`. No Samsung testing requested.
+
+**Root problem in promotion criteria:** the 158 entries were selected by `ffprobe` seeing video packets from the Windows Server. That is not proof of live browser HLS manifest + segment access, correct CORS/referrer/UA headers, content identity, or ongoing availability. Never claim 158 playable.
+
+**Relevant prior TVA source audit:** Dynamo Kyiv TV HD (1080p/h264, 25 video packets), Sport 3 Ukraine (1080p/h264, 24 packets) and Maincast Кіберспорт (1080p/h264, 50 packets) have viable *candidates*, but only pending channel-identity and Lampa playback checks. In particular Maincast Кіберспорт ≠ necessarily Maincast Sport. Do not silently swap or promote.
+
+**Immediate next action:** Run one URL-free **batch** sports diagnostic against existing `C:\IPTV-Manager\public\playlists\IPTV-UA-NEW.m3u`, including HTTP status and content type, manifest signature, browser Origin/CORS headers, bounded ffprobe metadata. Separate server-only errors from Chrome CORS and missing segment issues. Never expose stream URL/query token in chat/logs. Preserve stable working channels, EPG, #19/#14 and all RU. Avoid manual channel-by-channel Samsung tests.
+
+**Required publishing gate going forward:** provisional stream selection → timed repeat media/manifest probes → HTTP/CORS/media segment check from actual client origin → content identity review → release-stage QA + rollback → explicit approval before changing public UA M3U. Maintain continuous alternative monitoring and last-good. AutoPublish remains OFF. EPG 53/158 is a separate coverage issue.
+
+---
+
 # 18 NOV — CHROME LEGACY-REGISTRY CONFLICT AND FIX
 
 User Chrome Lampa showed **17 registered and 17 loaded IPTV-related scripts**, including both `iptv-plus-v1.2.0-settings-fix.js` / `iptv-plus-v1.2.1-auto-refresh.js`, many legacy autosetup scripts pointing to `IPTV-UA-RU-Relay-v02-257.m3u`, both independent IPTV #19/#14, and the new `iptv-ua-managed-v1.3.1.js` loaded last. The old script initializes global `window.lampa_iptv_plus_ready` first, so the new IPTV Украина plugin is skipped by its duplicate guard.
