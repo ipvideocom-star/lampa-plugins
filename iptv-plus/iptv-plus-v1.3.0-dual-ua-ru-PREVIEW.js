@@ -100,44 +100,8 @@
         return field(activeRegion() + '_' + type);
     }
 
-    function selectRegion(component, region) {
-        if (region !== 'ua' && region !== 'ru') return;
-        if (region === activeRegion() && state.channels.length) return;
-        Lampa.Storage.set(PLUGIN + '_region', region);
-        state.channels = [];
-        state.visible = [];
-        state.groups = [];
-        state.groupCounts = {};
-        state.epg = {};
-        state.epgNames = {};
-        state.playlistEpg = '';
-        state.archiveHint = false;
-        state.autoEpg = false;
-        state.guideMode = 'none';
-        state.guideLoading = false;
-        state.guidePromise = null;
-        state.archiveLoading = {};
-        state.archiveReady = {};
-        state.archiveFailed = {};
-        state.loadedAt = 0;
-        state.loadedPlaylistUrl = '';
-        state.loadedPlaylistText = '';
-        state.guideTicket++;
-        component.category = 'all';
-        component.searchQuery = '';
-        component.renderLimit = CHANNEL_PAGE_SIZE;
-        component.activity.loader(true);
-        loadData(true).then(function () {
-            component.build();
-            component.activity.loader(false);
-            component.start();
-        }).catch(function (error) {
-            component.activity.loader(false);
-            component.renderError(error);
-            component.start();
-            notify(error.message || 'Не удалось открыть список ' + region.toUpperCase());
-        });
-    }
+    // Region is selected by the corresponding Lampa sidebar item.
+    // No country switcher is needed inside the IPTV screen.
 
     function notify(message) {
         Lampa.Noty.show(message);
@@ -153,7 +117,7 @@
     }
 
     function favoriteIds() {
-        var saved = storage('favorites', []);
+        var saved = storage(activeRegion() + '_favorites', []);
         return Array.isArray(saved) ? saved : [];
     }
 
@@ -178,13 +142,13 @@
         var legacy = legacyChannelKey(channel);
         var favorites = favoriteIds().filter(function (item) { return item !== key && item !== legacy; });
         if (enabled) favorites.unshift(key);
-        Lampa.Storage.set(PLUGIN + '_favorites', favorites);
+        Lampa.Storage.set(PLUGIN + '_' + activeRegion() + '_favorites', favorites);
         if (state.component && state.component.onFavoritesChanged) state.component.onFavoritesChanged();
         return enabled;
     }
 
     function historyIds() {
-        var saved = storage('history', []);
+        var saved = storage(activeRegion() + '_history', []);
         return Array.isArray(saved) ? saved : [];
     }
 
@@ -192,8 +156,8 @@
         var key = channelKey(channel);
         var history = historyIds().filter(function (item) { return item !== key; });
         history.unshift(key);
-        Lampa.Storage.set(PLUGIN + '_history', history.slice(0, 40));
-        Lampa.Storage.set(PLUGIN + '_last_channel', key);
+        Lampa.Storage.set(PLUGIN + '_' + activeRegion() + '_history', history.slice(0, 40));
+        Lampa.Storage.set(PLUGIN + '_' + activeRegion() + '_last_channel', key);
         if (state.component) {
             state.component.historyDirty = true;
         }
@@ -1454,7 +1418,7 @@
         this.detailPendingFocus = '';
         this.historyDirty = false;
         this.channelFocus = {};
-        this.html = $('<div class="iptv-plus-screen"><div class="iptv-plus-head"><div class="iptv-plus-title">IPTV+<span></span></div><div class="iptv-plus-clock"></div></div><div class="iptv-plus-toolbar"></div><div class="iptv-plus-layout"><div class="iptv-plus-sidebar"></div><div class="iptv-plus-list"></div></div><div class="iptv-plus-detail"></div></div>');
+        this.html = $('<div class="iptv-plus-screen"><div class="iptv-plus-head"><div class="iptv-plus-title">IPTV ' + (activeRegion() === 'ua' ? 'Украина' : 'Россия') + '<span></span></div><div class="iptv-plus-clock"></div></div><div class="iptv-plus-toolbar"></div><div class="iptv-plus-layout"><div class="iptv-plus-sidebar"></div><div class="iptv-plus-list"></div></div><div class="iptv-plus-detail"></div></div>');
         this.last = null;
         this.clockTimer = 0;
         this.archiveTimer = 0;
@@ -1545,15 +1509,11 @@
 
         this.buildToolbar = function () {
             var toolbar = self.html.find('.iptv-plus-toolbar').empty();
-            var uaButton = $('<div class="iptv-plus-button selector' + (activeRegion() === 'ua' ? ' active' : '') + '">🇺🇦 Украина</div>');
-            var ruButton = $('<div class="iptv-plus-button selector' + (activeRegion() === 'ru' ? ' active' : '') + '">🇷🇺 Россия</div>');
             var playlistButton = $('<div class="iptv-plus-button selector"><b>＋</b> Плейлист ' + activeRegion().toUpperCase() + '</div>');
             var epgButton = $('<div class="iptv-plus-button selector">' + (state.guideLoading ? 'EPG: загрузка…' : state.autoEpg ? 'EPG: AUTO' : 'EPG вручную') + '</div>');
             var searchButton = $('<div class="iptv-plus-button selector">⌕ Поиск' + (self.searchQuery ? ': ' + escapeHtml(self.searchQuery) : '') + '</div>');
             var reloadButton = $('<div class="iptv-plus-button selector">↻ Обновить</div>');
 
-            uaButton.on('hover:enter', function () { selectRegion(self, 'ua'); });
-            ruButton.on('hover:enter', function () { selectRegion(self, 'ru'); });
             playlistButton.on('hover:enter', function () { editPlaylist(self); });
             epgButton.on('hover:enter', function () { editEpg(self); });
             searchButton.on('hover:enter', function () {
@@ -1586,7 +1546,7 @@
                     notify(error.message || 'Ошибка обновления');
                 });
             });
-            toolbar.append(uaButton, ruButton, playlistButton, searchButton, epgButton, reloadButton);
+            toolbar.append(playlistButton, searchButton, epgButton, reloadButton);
             toolbar.find('.selector').on('hover:focus', function () { self.focused(this); });
         };
 
@@ -1989,12 +1949,12 @@
     }
 
     function addSettings() {
-        Lampa.SettingsApi.addComponent({ component: PLUGIN, icon: ICON, name: 'IPTV+' });
+        Lampa.SettingsApi.addComponent({ component: PLUGIN, icon: ICON, name: 'IPTV' });
 
         Lampa.SettingsApi.addParam({
             component: PLUGIN,
             param: { name: PLUGIN + '_region', type: 'select', values: { ua: '🇺🇦 Украина', ru: '🇷🇺 Россия' }, default: 'ua' },
-            field: { name: 'Активный список', description: 'Один IPTV+ — два независимых M3U' }
+            field: { name: 'Активный список', description: 'В боковом меню два независимых пункта: Украина и Россия' }
         });
         ['ua', 'ru'].forEach(function (region) {
             var label = region === 'ua' ? 'Украина' : 'Россия';
@@ -2043,14 +2003,26 @@
     }
 
     function addMenu() {
-        if ($('.menu .menu__list .' + PLUGIN + '-menu').length) return;
         var list = $('.menu .menu__list').eq(0);
         if (!list.length) return;
-        var button = $('<li class="menu__item selector ' + PLUGIN + '-menu"><div class="menu__ico">' + ICON + '</div><div class="menu__text">IPTV+</div></li>');
-        button.on('hover:enter', function () {
-            Lampa.Activity.push({ url: '', title: 'IPTV+', component: PLUGIN, page: 1 });
+
+        // One shared plugin component, TWO independent top-level menu entries.
+        // Display titles are provisional until the user approves final wording.
+        [
+            { region: 'ua', title: 'IPTV Украина', css: 'iptv-plus-ua-menu' },
+            { region: 'ru', title: 'IPTV Россия', css: 'iptv-plus-ru-menu' }
+        ].forEach(function (entry) {
+            if (list.find('.' + entry.css).length) return;
+            var button = $('<li class="menu__item selector ' + entry.css + '"><div class="menu__ico">' +
+                ICON + '</div><div class="menu__text">' + entry.title + '</div></li>');
+            button.on('hover:enter', function () {
+                // Selecting a sidebar item chooses its own M3U/EPG pair.
+                // Never import or modify any legacy/combined playlist settings.
+                Lampa.Storage.set(PLUGIN + '_region', entry.region);
+                Lampa.Activity.push({ url: '', title: entry.title, component: PLUGIN, page: 1 });
+            });
+            list.append(button);
         });
-        list.append(button);
     }
 
     function installMenu() {
