@@ -1325,6 +1325,59 @@
         });
     }
 
+    // UA-only display categorization. Channel URLs, IDs, EPG and M3U remain intact.
+    // Reuse existing group labels: do not introduce new categories.
+    function correctUaChannelGroups(channels) {
+        if (!Array.isArray(channels) || !channels.length) return 0;
+        var groups = [];
+        channels.forEach(function (ch) {
+            if (ch.group && groups.indexOf(ch.group) < 0) groups.push(ch.group);
+        });
+        var main = groups.filter(function (g) {
+            return /загальн|основн|общ|general|main/i.test(g);
+        })[0];
+        var knowledge = groups.filter(function (g) {
+            return /пізнав|познав|documentary|science|lifestyle/i.test(g);
+        })[0];
+        if (!main || !knowledge || main === knowledge) {
+            console.warn('[IPTV Украина] expected UA category groups not found');
+            return 0;
+        }
+        // Canonical IDs (when present) are less ambiguous than channel names.
+        var mainIds = {
+            '1plus1.ua': 1, '2plus2.ua': 1, 'ictv.ua': 1,
+            'ictv2.ua': 1, 'inter.ua': 1, 'stb.ua': 1,
+            'novyichannel.ua': 1, 'tet.ua': 1, 'pershyi.ua': 1
+        };
+        var knowledgeIds = {
+            'dacha.ua': 1, 'rybalka.ua': 1, 'trofei.ua': 1,
+            'nauka.ua': 1, 'terra.ua': 1, 'fauna.ua': 1,
+            'kuskus.ua': 1
+        };
+        var changed = 0;
+        channels.forEach(function (ch) {
+            var id = String(ch.id || '').toLowerCase().replace(/@.*$/, '');
+            var name = String(ch.name || '').trim()
+                .replace(/\s*(?:\((?:1080p|720p|576p|4k|hd|sd)\)|\[(?:1080p|720p|4k|hd|sd)\])\s*$/i, '')
+                .replace(/\s+(?:fhd|uhd|hd|sd|4k)\s*$/i, '')
+                .toLowerCase();
+            var goal = '';
+            if (mainIds[id] ||
+                /^(?:1\+1|2\+2|ictv\s*2?|іctv\s*2?|ictv2|інтер|интер|inter|стб|новий канал|новый канал|тет|суспільне перший|перший)$/i.test(name)) {
+                goal = main;
+            } else if (knowledgeIds[id] ||
+                /^(?:дача|dacha|риба[лк]ка|рыбалка|риболовля|охота|полювання|трофей|trofey|trofei|наука|nauka|фауна|fauna|terra|терра|куськусь|kus kus|kuskus)$/i.test(name)) {
+                goal = knowledge;
+            }
+            if (goal && ch.group !== goal) {
+                ch.group = goal;
+                changed++;
+            }
+        });
+        if (changed) console.log('[IPTV Украина] corrected channel groups:', changed);
+        return changed;
+    }
+
     function loadData(force) {
         var playlistUrl = UA_PLAYLIST_URL;
         if (!playlistUrl) return Promise.reject(new Error('Нажмите «Плейлист» и укажите URL M3U'));
@@ -1344,6 +1397,7 @@
             }
 
             var parsed = parseM3U(m3u);
+            correctUaChannelGroups(parsed.channels);
             state.channels = parsed.channels;
             state.loadedPlaylistUrl = playlistUrl;
             state.loadedPlaylistText = m3u;
