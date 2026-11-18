@@ -1,3 +1,13 @@
+# 2026-11-18 CUTOVER FAILURE AND CORRECTIVE PACKAGE v1.2
+
+**Actual v1.1 execution:** offline selftest PASS, preflight PASS (158 UA channels, 9 groups, primary `iptv_plus`, global exclusion list empty), EPGShare and OpenEPG downloads OK, then install aborted. Exact message: "Only the private UA Verified preview folder is accepted as M3U input." Installer printed rollback success but the post-rollback server state has not been independently verified.
+
+**Root cause:** `Update-UA-Managed-EPG-v1.ps1` incorrectly passed the new public `IPTV-UA-NEW.m3u` into a shadow EPG generator intentionally restricted to `C:\IPTV-Manager\data\ua-autocatalog\v3\verified-preview\...`.
+
+**Corrective artifact:** `UA-Managed-Cutover-v1.2-ALL-UIDs-FIX.zip`; SHA256 `1FB453896AAE84E2622EE57A5B4F5305A081686A87039C20C225FEB1CAD1E4F0`. Updater checks public NEW M3U identical to the approved private 158-channel source except EXTM3U EPG header, then passes the private source to the original guarded generator. Installer adds regression selftest, rollback of deployed helper files. ZIP integrity and static checks PASS; on-server PowerShell syntax/runtime still need validation. **Never run v1.1 again.** Release scope remains primary UA globally to all UIDs, preserving separate #19 and #14 and all RU artifacts. Normal user-side cutover backup from failed attempt: `C:\ReservLampac\IPTV-Manager\UA-Managed\cutover-20261118-144440-13c57be1`.
+
+---
+
 # UPDATE — UA AVAILABLE TO ALL UIDs (2026-11-18)
 
 The user has now explicitly approved **global Plugin Policy Server delivery** of the new primary **IPTV Украина** plugin to ALL valid Lampa UIDs across Samsung, Android TV, and other clients. This replaces the former Samsung-only scope for the first managed IPTV plugin. The legacy IPTV #19 and IPTV #14 plugin entries and all other plugins (including their own `exclude_uids`) remain unchanged.
