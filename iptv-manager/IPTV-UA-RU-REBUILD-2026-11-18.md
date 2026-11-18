@@ -1,3 +1,21 @@
+# UA MANAGER AUDIT — ACTUAL 2026-11-18 RESULTS, AND V1.1 STAGING
+
+**User server report** `review-20261118-180142-b46a9914`, read-only:
+- 158 published UA channels; 9 source groups; duplicate tvg-ids **zero**.
+- 127 exact IDs recognized by category rules v1.0, **39** group changes proposed; 31 IDs remain unchanged for manual content review.
+- Current group distribution: Загальні 60, Новини 15, Кіно та серіали 20, Спорт 12, Пізнавальні 8, Розваги 16, Регіональні 9, Дитячі 6, Музика 12.
+- Proposed v1.0 grouping: Загальні 33, Новини 13, Кіно та серіали 22, Спорт 12, Пізнавальні 18, Розваги 16, Регіональні 25, Дитячі 6, Музика 13.
+- EPG current and next-7-days **53/158**; missing **105**, including regional 22, movies 18, main 18, knowledge 10, music 10, news 8, entertainment 8, sport 8, kids 3.
+- TVA provider snapshot exists, 13.4 hours old. No streams probed, M3U and EPG unchanged, no policy/RU changes.
+- Optional third XMLTV source `https://iptv-org.github.io/epg/guides/ua/tvgid.ua.epg.xml`: `AdditionalExactEpgCandidates=0` **does not indicate a successful search**, because `AdditionalCandidateCsv` was empty. The v1 diagnostic swallowed download/parse failure; this is corrected in the staged v1.1 module to distinguish `CHECKED`, `UNAVAILABLE`, `NOT_REQUESTED`.
+- Uploaded `IPTV-Samsung-Audit-257(1).txt` contains historical **257-channel combined UA/RU data**, and is NOT the acceptance or current-playback ledger for the newly published 158-UA M3U; do not mix counts or use it to alter RU.
+
+**Category policy updated in GitHub:** `iptv-manager/ua/UA-Category-Overrides-v1.json`, version 1.1.0, 131 exact channel IDs. Four added unambiguous health/religious-educational mappings `366TV.ua`, `EWTNUkraine.ua`, `Glas.ua`, `HopeChannelUkraine.ua` → Пізнавальні. With the supplied current 158-UA snapshot this predicts **43 category-only changes**, 27 IDs unchanged/unclassified. This is a candidate **NOT YET applied** to production playlist.
+- Staged v1.1 revision of the existing manager review module has optional `-StageCategories` plus mandatory previous playlist SHA; it privately produces a candidate M3U changing only `group-title` and `#EXTGRP` metadata with per-line integrity checks, never publishes. No new Scheduled Task. Client-side UI category correction is already deployed and independent of source M3U.
+- Next gate: validate staging candidate and diff, then request/perform safe metadata-only replacement under user approval while preserving original stream URLs, EPG, existing #19/#14 and AutoPublish OFF. EPG source discovery and TVA alternatives require separate QA and content review before any merging.
+
+---
+
 # PROGRESS 2026-11-18 — Stage UA category and EPG readiness (no publication)
 
 Samsung user test: about 20/20 sampled channels play, including Chrome-failing sports. Preserve 158 M3U and do not treat browser failure as source failure.
