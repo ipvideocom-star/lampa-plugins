@@ -1,3 +1,14 @@
+# PROGRESS 2026-11-18 — Stage UA category and EPG readiness (no publication)
+
+Samsung user test: about 20/20 sampled channels play, including Chrome-failing sports. Preserve 158 M3U and do not treat browser failure as source failure.
+
+Created centralized exact-ID policy: iptv-manager/ua/UA-Category-Overrides-v1.json. Rules include 127 of 158 known IDs across the existing nine categories; 31 ambiguous IDs remain unchanged. Examples ICTV/ICTV2 -> General, Dacha/Rybalka/Trofei -> Knowledge; the TV marathon is News; separate Maincast Sport/Cybersport. Source names are preserved and no client/plugin settings altered by this staging.
+
+Created documentation: iptv-manager/ua/README.md. Prepared a permanent read-only audit bundle UA-Manager-Review-v1-READONLY.zip for local server execution. The tool reads the *actual published* UA M3U and current EPG, reports URL-free per-channel current/proposed categories, live/future guide, missing guide, TVA provider freshness, and optionally stages exact-ID candidates from tvgid.ua XMLTV. No outputs are live/published; no automatic guide merge or stream replacement.
+
+Next step after user-server audit: inspect all 158 category diffs (not just an approximate offline list), review potential true EPG matches for current 105 uncovered channels, then stage coherent source changes to existing AutoCatalog and EPG 6h pipeline. After successful selftests, integrate UA watchdog in existing Nightly task; no duplicate Windows Scheduled Tasks. AutoPublish OFF, user-approval required for public stream/EPG/Caddy changes. #19/#14 and RU unchanged.
+
+---
 # UA SAMSUNG ACCEPTANCE UPDATE AND CATEGORY RULES — 2026-11-18
 
 **Samsung acceptance evidence:** user personally tested about 20 Ukrainian streams in Samsung Lampa and found all played, including many sport channels that fail in Chrome. The previous statement that 158-UA was a failed playback release **is no longer valid globally**; Samsung is the primary acceptance client, Chrome is an auxiliary client whose HLS/CORS/network behavior differs. This test DOES NOT demonstrate all 158 play continuously or that Chrome has been fixed. Keep Chrome `manifestLoadError` as a separate browser-compatibility backlog; do not remove working Samsung channels merely because of Chrome-only failures.
