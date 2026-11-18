@@ -36,3 +36,12 @@
 
 ## UI correction on 2026-11-18
 The user explicitly rejected the single sidebar entry with an internal country selector. Desired final Samsung menu has exactly two entries: **IPTV Украина** and **IPTV Россия** (working labels only, not yet approved); each opens its matching independently generated M3U. This revision was implemented in the staging-only plugin source and verified for JS syntax. Do not install it to production until separate UA/RU M3U and policy migration are ready.
+
+
+## Progress — first fresh UA/RU staging module (2026-11-18)
+- A private on-server builder package `IPTV-Dual-Fresh-Stage-v1.zip` has been prepared for PowerShell 7. Source module installs to `C:\IPTV-Manager\Tools\DualRelease\Stage-IPTV-Dual-Fresh-v1.ps1`. Package remains staging-only and must pass runtime PowerShell ParseFile and offline SelfTest on the server before any network work.
+- UA input: existing private **158-channel verified-preview** from UA AutoCatalog v3, no legacy published UA list. Validate IDs, duplication and provenance.
+- RU input: **fresh upstream** `https://raw.githubusercontent.com/iptv-org/iptv/master/streams/ru.m3u`, not old RU pilots or user community lists. Filter a curated national/thematic allowlist; never treat regional/time-shift channels as interchangeable.
+- Run ffprobe on at most 100 RU candidate URLs by default, concurrency 3 and timeout 15 seconds. Only video >=3 observed packets with a video resolution is eligible for private RU staging. Quarantine exact URL reuse across multiple channel IDs. No content-identity assertion from packets.
+- Outputs stay private in `C:\IPTV-Manager\data\dual-iptv-staging\release-*\IPTV-UA-NEW-STAGED.m3u` and `IPTV-RU-NEW-STAGED.m3u`; URL-free `report.json`, `RU-MEDIA-REVIEW-URL-FREE.csv` and `RU-PRIORITY-CHANNELS-URL-FREE.csv`.
+- This is **not** final publication. It does not clean or activate EPG, change Samsung policy, activate the two sidebar entries or touch old tasks. Successful staging must be reviewed, RU coverage expanded as needed and clean UA EPG built separately before controlled cutover.
