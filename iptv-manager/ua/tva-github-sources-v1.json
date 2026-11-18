@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "sourceId": "tva-github",
+  "repository": "slava-67/TV",
+  "defaultBranch": "IPTV",
+  "upstream": "https://github.com/slava-67/TV/tree/IPTV",
+  "fetchedAtUTC": "2026-11-18",
+  "purpose": "Read-only discovery inputs for existing IPTV-Manager/TVA-FeedProvider; not a production playlist.",
+  "autopublish": false,
+  "existingTask": "IPTV-Manager-v2-Nightly",
+  "existingProviderServerPath": "C:\\IPTV-Manager\\Tools\\UA-AutoCatalog\\v3\\TVA-FeedProvider.psm1",
+  "rawSourceUrlPolicy": "Source manifest may be public. Parsed channel stream URLs, auth query params and tokens must remain in private server snapshots; never commit them.",
+  "lastGoodPolicy": "Keep last valid parsed response and source SHA per feed; hold on unavailable, empty, unsafe, massive-churn or wrong-content feeds.",
+  "selectionPolicy": "Four dedicated UA/category feeds are proposal priority; remaining 15 are discovery only until channel-by-channel identity and availability review; no name-only source promotion.",
+  "epgPolicy": "Keep existing UA XMLTV pipeline separate; preserve approved EPG mappings.",
+  "sourceCount": 19,
+  "sources": [
+    {
+      "id": "tva-github:ua",
+      "path": "ua.m3u",
+      "url": "https://raw.githubusercontent.com/slava-67/TV/refs/heads/IPTV/ua.m3u",
+      "family": "ua_core",
+      "scope": "UA_PRIORITY"
+    },
+    {
+      "id": "tva-github:sport",
+      "path": "sport.m3u",
+      "url": "https://raw.githubusercontent.com/slava-67/TV/refs/heads/IPTV/sport.m3u",
+      "family": "sports",
+      "scope": "UA_PRIORITY"
+    },
+    {
+      "id": "tva-github:kids",
+      "path": "kids.m3u",
+      "url": "https://raw.githubusercontent.com/slava-67/TV/refs/heads/IPTV/kids.m3u",
+      "family": "kids",
+      "scope": "UA_PRIORITY"
+    },
+    {
+      "id": "tva-github:poznavatelni",
+      "path": "poznavatelni.m3u",
+      "url": "https://raw.githubusercontent.com/slava-67/TV/refs/heads/IPTV/poznavatelni.m3u",
+      "family": "documentary",
+      "scope": "UA_PRIORITY"
+    },
+    {
+      "id": "tva-github:avto-full",
+      "path": "avto-full.m3u",
+      "url": "https://raw.githubusercontent.com/slava-67/TV/refs/heads/IPTV/avto-full.m3u",
+      "family": "mixed_full",
+      "scope": "DISCOVERY_ONLY"
+    },
+    {
+      "id": "tva-github:avto-iptv-tva",
+      "path": "avto-iptv-tva.m3u",
+      "url": "https://raw.githubusercontent.com/slava-67/TV/refs/heads/IPTV/avto-iptv-tva.m3u",
+      "family": "mixed",
+      "scope": "DISCOVERY_ONLY"
+    },
+    {
+      "id": "tva-github:avto",
+      "path": "avto.m3u",
+      "url": "https://raw.githubusercontent.com/slava-67/TV/refs/heads/IPTV/avto.m3u",
+      "family": "mixed",
+      "scope": "DISCOVERY_ONLY"
+    },
+    {
+      "id": "tva-github:avtomini",
+      "path": "avtomini.m3u",
+      "url": "https://raw.githubusercontent.com/slava-67/TV/refs/heads/IPTV/avtomini.m3u",
+      "family": "mixed_mini",
+      "scope": "DISCOVERY_ONLY"
+    },
+    {
+      "id": "tva-github:avtox",
+      "path": "avtox.m3u",
+      "url": "https://raw.githubusercontent.com/slava-67/TV/refs/heads/IPTV/avtox.m3u",
+      "family": "mixed",
+      "scope": "DISCOVERY_ONLY"
+    },
+    {
+      "id": "tva-github:iptv",
+      "path": "iptv.m3u",
+      "url": "https://raw.githubusercontent.com/slava-67/TV/refs/heads/IPTV/iptv.m3u",
+      "family": "mixed",
+      "scope": "DISCOVERY_ONLY"
+    },
+    {
+      "id": "tva-github:kino-plus",
+      "path": "kino-plus.m3u",
+      "url": "https://raw.githubusercontent.com/slava-67/TV/refs/heads/IPTV/kino-plus.m3u",
+      "family": "cinema",
+      "scope": "DISCOVERY_ONLY"
+    },
+    {
+      "id": "tva-github:kinofilm",
+      "path": "kinofilm.m3u",
+      "url": "https://raw.githubusercontent.com/slava-67/TV/refs/heads/IPTV/kinofilm.m3u",
+      "family": "films",
+      "scope": "DISCOVERY_ONLY"
+    },
+    {
+      "id": "tva-github:provayder",
+      "path": "provayder.m3u",
+      "url": "https://raw.githubusercontent.com/slava-67/TV/refs/heads/IPTV/provayder.m3u",
+      "family": "provider",
+      "scope": "DISCOVERY_ONLY"
+    },
+    {
+      "id": "tva-github:tva1",
+      "path": "tva1.m3u",
+      "url": "https://raw.githubusercontent.com/slava-67/TV/refs/heads/IPTV/tva1.m3u",
+      "family": "mixed",
+      "scope": "DISCOVERY_ONLY"
+    },
+    {
+      "id": "tva-github:tva2",
+      "path": "tva2.m3u",
+      "url": "https://raw.githubusercontent.com/slava-67/TV/refs/heads/IPTV/tva2.m3u",
+      "family": "mixed",
+      "scope": "DISCOVERY_ONLY"
+    },
+    {
+      "id": "tva-github:tva3",
+      "path": "tva3.m3u",
+      "url": "https://raw.githubusercontent.com/slava-67/TV/refs/heads/IPTV/tva3.m3u",
+      "family": "mixed",
+      "scope": "DISCOVERY_ONLY"
+    },
+    {
+      "id": "tva-github:tva4",
+      "path": "tva4.m3u",
+      "url": "https://raw.githubusercontent.com/slava-67/TV/refs/heads/IPTV/tva4.m3u",
+      "family": "mixed",
+      "scope": "DISCOVERY_ONLY"
+    },
+    {
+      "id": "tva-github:tva5",
+      "path": "tva5.m3u",
+      "url": "https://raw.githubusercontent.com/slava-67/TV/refs/heads/IPTV/tva5.m3u",
+      "family": "mixed",
+      "scope": "DISCOVERY_ONLY"
+    },
+    {
+      "id": "tva-github:vpn",
+      "path": "vpn.m3u",
+      "url": "https://raw.githubusercontent.com/slava-67/TV/refs/heads/IPTV/vpn.m3u",
+      "family": "vpn",
+      "scope": "DISCOVERY_ONLY"
+    }
+  ]
+}
