@@ -1,4 +1,4 @@
-name: SuperTV PowerShell safety and syntax
+name: SuperTV PowerShell integration safety
 
 on:
   pull_request:
@@ -19,22 +19,54 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $file = 'tools/supertv/Run-NewSuperTV-Pilot-v0.2.ps1'
-          $tokens = $null
-          $parseErrors = $null
-          [System.Management.Automation.Language.Parser]::ParseFile(
-            $file, [ref]$tokens, [ref]$parseErrors
-          ) | Out-Null
-          if ($parseErrors.Count -gt 0) {
-            $parseErrors | Format-List
-            throw 'POWERSHELL_SYNTAX_FAILED'
+          foreach ($file in @(
+            'tools/supertv/Run-NewSuperTV-Pilot-v0.2.ps1',
+            'tools/supertv/Serve-Local-Providers.ps1',
+            'tools/supertv/Test-Mock-StreamGate.ps1'
+          )) {
+            $tokens = $null
+            $parseErrors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $file, [ref]$tokens, [ref]$parseErrors
+            ) | Out-Null
+            if ($parseErrors.Count -gt 0) {
+              $parseErrors | Format-List
+              throw "POWERSHELL_SYNTAX_FAILED: $file"
+            }
           }
           $files = @(Get-ChildItem 'tools/supertv' -Recurse -File)
           if (@($files | Where-Object {
             $_.Extension -in @('.m3u','.m3u8','.log','.json','.zip','.exe')
           }).Count -ne 0) { throw 'POTENTIAL_PRIVATE_SOURCE_IN_REPO' }
-          $source = Get-Content -LiteralPath $file -Raw -Encoding UTF8
+          $source = Get-Content -LiteralPath 'tools/supertv/Run-NewSuperTV-Pilot-v0.2.ps1' -Raw -Encoding UTF8
           foreach ($route in @('/healthz','/playlist.m3u','/api/v1/channels')) {
             if (!$source.Contains($route)) { throw "MISSING_READINESS_CHECK: $route" }
           }
           Write-Host 'RESULT: PARSE_AND_BOUNDARY_PASS'
+
+  mock-streamgate-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: MrSibe/streamgate
+          ref: ceac1cfb686d5477ca6b052c700f6d58b0b0431e
+          path: streamgate-src
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: streamgate-src/go.mod
+          cache: false
+      - name: Compile public StreamGate test binary
+        shell: pwsh
+        working-directory: streamgate-src
+        run: |
+          $ErrorActionPreference='Stop'
+          New-Item -ItemType Directory -Path '..\streamgate-bin' -Force | Out-Null
+          go build -o '../streamgate-bin/streamgate.exe' ./cmd/gateway
+          if ($LASTEXITCODE -ne 0) { throw 'STREAMGATE_BUILD_FAILED' }
+      - name: Real two-provider mock import and merge test
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          & './tools/supertv/Test-Mock-StreamGate.ps1' -StreamGateExe (Join-Path $PWD 'streamgate-bin/streamgate.exe')
