@@ -1,0 +1,40 @@
+name: SuperTV PowerShell safety and syntax
+
+on:
+  pull_request:
+    paths:
+      - 'tools/supertv/**'
+      - '.github/workflows/supertv-pilot-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parse-and-boundary:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse PowerShell 7 and verify no secret artifacts
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $file = 'tools/supertv/Run-NewSuperTV-Pilot-v0.2.ps1'
+          $tokens = $null
+          $parseErrors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            $file, [ref]$tokens, [ref]$parseErrors
+          ) | Out-Null
+          if ($parseErrors.Count -gt 0) {
+            $parseErrors | Format-List
+            throw 'POWERSHELL_SYNTAX_FAILED'
+          }
+          $files = @(Get-ChildItem 'tools/supertv' -Recurse -File)
+          if (@($files | Where-Object {
+            $_.Extension -in @('.m3u','.m3u8','.log','.json','.zip','.exe')
+          }).Count -ne 0) { throw 'POTENTIAL_PRIVATE_SOURCE_IN_REPO' }
+          $source = Get-Content -LiteralPath $file -Raw -Encoding UTF8
+          foreach ($route in @('/healthz','/playlist.m3u','/api/v1/channels')) {
+            if (!$source.Contains($route)) { throw "MISSING_READINESS_CHECK: $route" }
+          }
+          Write-Host 'RESULT: PARSE_AND_BOUNDARY_PASS'
